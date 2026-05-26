@@ -50,6 +50,13 @@ python manage.py migrate --noinput
 echo "[entrypoint] Seeding default subscription plans..."
 python manage.py create_default_plans
 
+# ── Optional admin bootstrap for free Render deployments ───────────────────
+if [ "${DOCSEVA_CREATE_SUPERUSER:-False}" = "True" ]; then
+    echo "[entrypoint] Bootstrapping Django superuser..."
+    python manage.py bootstrap_superuser
+fi
+
+
 # ── Collect static files (web service only — skip for Celery workers) ─────────
 if [ "${SKIP_COLLECTSTATIC:-False}" != "True" ]; then
     echo "[entrypoint] Collecting static files..."
