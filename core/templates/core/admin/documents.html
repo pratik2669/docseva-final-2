@@ -1,0 +1,140 @@
+{% extends 'core/admin/base_admin.html' %}
+{% block title %}Documents | DocSeva Admin{% endblock %}
+{% block content %}
+<div class="mb-10 animate-slide-up">
+  <div class="flex items-center gap-2 text-indigo-600 font-black text-xs uppercase tracking-[0.2em] mb-2">
+    <i data-lucide="archive" class="w-4 h-4"></i> Asset Management
+  </div>
+  <h1 class="text-4xl font-black text-slate-900 tracking-tight">Global Vault Registry</h1>
+  <p class="text-slate-500 mt-1">Audit and manage all documents across the system.</p>
+</div>
+
+<section class="glass-3d p-6 mb-8 animate-slide-up animate-delay-1">
+  <form method="get" class="flex flex-wrap gap-4 items-end">
+    <div class="flex-1 min-w-[300px]">
+      <label class="block text-xs font-black uppercase tracking-widest text-slate-400 mb-2 pl-1">Search Documents</label>
+      <div class="relative group">
+        <i data-lucide="search" class="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 group-focus-within:text-indigo-500 transition-colors"></i>
+        <input name="q" class="w-full pl-11 pr-4 py-2.5 border-2 border-slate-100 rounded-xl focus:border-indigo-500 focus:bg-white transition-all outline-none text-sm" placeholder="Search title, source, or username..." value="{{ query }}">
+      </div>
+    </div>
+    
+    <div class="w-full md:w-64">
+      <label class="block text-xs font-black uppercase tracking-widest text-slate-400 mb-2 pl-1">Category</label>
+      <div class="relative">
+        <select name="category" class="w-full pl-4 pr-10 py-2.5 border-2 border-slate-100 rounded-xl focus:border-indigo-500 outline-none text-sm cursor-pointer appearance-none bg-white">
+          <option value="">All Categories</option>
+          {% for value,label in categories %}
+            <option value="{{ value }}" {% if category == value %}selected{% endif %}>{{ label }}</option>
+          {% endfor %}
+        </select>
+        <i data-lucide="chevron-down" class="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none"></i>
+      </div>
+    </div>
+
+    <div class="flex gap-2">
+      <button class="btn-modern btn-primary bg-slate-900 hover:bg-black py-3 px-8 text-sm">Apply Filters</button>
+      <a href="{% url 'admin_documents' %}" class="btn-modern btn-outline py-3 px-6 text-sm border-slate-200">Reset</a>
+    </div>
+  </form>
+</section>
+
+<section class="card-3d overflow-hidden animate-slide-up animate-delay-2">
+  <div class="overflow-x-auto">
+    <table class="modern-table mb-0">
+      <thead>
+        <tr>
+          <th class="pl-8">Document</th>
+          <th>Vault Owner</th>
+          <th>Category</th>
+          <th>Size</th>
+          <th>Registry Date</th>
+          <th class="pr-8 text-right">Operations</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for doc in documents_page %}
+          <tr class="group border-b border-slate-50 last:border-none">
+            <td class="pl-8 py-5">
+              <div class="flex items-center gap-4">
+                <div class="h-10 w-10 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center shrink-0">
+                  <i data-lucide="file-text" class="w-5 h-5"></i>
+                </div>
+                <div class="min-w-0">
+                  <p class="font-black text-slate-900 truncate max-w-[200px]">{{ doc.title }}</p>
+                  <p class="text-[10px] text-slate-400 font-bold uppercase tracking-widest">{{ doc.source|default:'Manual Upload' }}</p>
+                </div>
+              </div>
+            </td>
+            <td>
+              <a href="{% url 'admin_user_detail' doc.user.id %}" class="flex items-center gap-2 group/user">
+                <div class="h-6 w-6 rounded-full bg-slate-100 flex items-center justify-center text-[10px] font-black text-slate-500 group-hover/user:bg-indigo-600 group-hover/user:text-white transition-all">
+                  {{ doc.user.username|slice:":1"|upper }}
+                </div>
+                <span class="text-sm font-bold text-slate-600 group-hover/user:text-indigo-600 transition-colors">{{ doc.user.username }}</span>
+              </a>
+            </td>
+            <td>
+              <span class="badge bg-indigo-50 text-indigo-700">{{ doc.get_category_display }}</span>
+            </td>
+            <td>
+              <span class="text-xs font-bold text-slate-500 bg-slate-100 px-2 py-1 rounded-lg">{{ doc.get_size_display }}</span>
+            </td>
+            <td>
+              <p class="text-sm font-bold text-slate-400">{{ doc.created_at|date:'M d, Y' }}</p>
+              <p class="text-[10px] text-slate-300 font-black uppercase tracking-widest">{{ doc.created_at|date:'H:i' }}</p>
+            </td>
+            <td class="pr-8 py-5 text-right">
+              <div class="flex items-center justify-end gap-2">
+                <a href="{% url 'admin_document_download' doc.id %}" class="p-2 rounded-lg text-slate-400 hover:bg-emerald-50 hover:text-emerald-600 transition-all" title="Secure Download">
+                  <i data-lucide="download" class="w-4 h-4"></i>
+                </a>
+                <form method="post" action="{% url 'admin_document_delete' doc.id %}" onsubmit="return confirm('ADMIN ACTION: Permanently delete this user document?')" class="m-0">
+                  {% csrf_token %}
+                  <button type="submit" class="p-2 rounded-lg text-slate-400 hover:bg-red-50 hover:text-red-600 transition-all" title="System Delete">
+                    <i data-lucide="trash-2" class="w-4 h-4"></i>
+                  </button>
+                </form>
+              </div>
+            </td>
+          </tr>
+        {% empty %}
+          <tr>
+            <td colspan="6" class="py-20 text-center">
+              <div class="flex flex-col items-center gap-4">
+                <div class="h-20 w-20 rounded-[2rem] bg-slate-50 flex items-center justify-center text-slate-200">
+                  <i data-lucide="search-x" class="w-12 h-12"></i>
+                </div>
+                <div>
+                  <h3 class="font-black text-xl text-slate-900">No registry records</h3>
+                  <p class="text-slate-500 text-sm">No documents match your current search criteria.</p>
+                </div>
+              </div>
+            </td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  {% if documents_page.paginator.num_pages > 1 %}
+    <div class="p-6 border-t border-slate-50 bg-slate-50/30 flex flex-wrap items-center justify-between gap-4">
+      <p class="text-xs font-black uppercase tracking-widest text-slate-400">
+        Record Registry: {{ documents_page.start_index }} - {{ documents_page.end_index }} of {{ documents_page.paginator.count }}
+      </p>
+      <div class="flex gap-2">
+        {% if documents_page.has_previous %}
+          <a href="?page={{ documents_page.previous_page_number }}&q={{ query }}&category={{ category }}" class="btn-modern btn-outline bg-white py-2 px-4 text-xs border-slate-200">
+            <i data-lucide="chevron-left" class="w-4 h-4 mr-1"></i> Previous
+          </a>
+        {% endif %}
+        {% if documents_page.has_next %}
+          <a href="?page={{ documents_page.next_page_number }}&q={{ query }}&category={{ category }}" class="btn-modern btn-outline bg-white py-2 px-4 text-xs border-slate-200">
+            Next <i data-lucide="chevron-right" class="w-4 h-4 ml-1"></i>
+          </a>
+        {% endif %}
+      </div>
+    </div>
+  {% endif %}
+</section>
+{% endblock %}

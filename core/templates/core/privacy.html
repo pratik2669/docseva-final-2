@@ -1,0 +1,24 @@
+{% extends 'core/base.html' %}
+{% block title %}Privacy Policy | DocSeva{% endblock %}
+{% block content %}
+<section class="py-16 lg:py-24 animate-slide-up">
+  <div class="max-w-4xl">
+    <span class="badge bg-blue-50 text-blue-700 mb-6">Privacy Policy</span>
+    <h1 class="text-5xl md:text-6xl font-black tracking-tight leading-tight mb-6">Privacy controls for sensitive documents.</h1>
+    <p class="text-xl text-slate-500 leading-relaxed">This template explains how the DocSeva deployment is intended to handle user information. Replace this page with reviewed legal text before public commercial launch.</p>
+  </div>
+</section>
+
+<section class="card-3d p-8 lg:p-12 mb-12 animate-slide-up animate-delay-1 prose-policy">
+  <h2>Information stored</h2>
+  <p>DocSeva stores account details, profile details, uploaded document metadata, uploaded files, renewal information, support tickets, notifications, security logs, and optional emergency QR information.</p>
+  <h2>Document sharing</h2>
+  <p>Documents are private by default. Public document access requires an enabled share link. Users can disable sharing and can decide whether public download is allowed.</p>
+  <h2>Emergency QR sharing</h2>
+  <p>Emergency QR pages expose only the emergency fields the user enters and only when emergency sharing is enabled.</p>
+  <h2>Security logs</h2>
+  <p>The application records important actions such as login attempts, uploads, downloads, sharing changes, and admin actions. Logs are used for account safety and audit review.</p>
+  <h2>Production responsibility</h2>
+  <p>The deployer must configure secure hosting, strong environment variables, HTTPS, a protected database, reliable backups, and real contact information before serving real users.</p>
+</section>
+{% endblock %}

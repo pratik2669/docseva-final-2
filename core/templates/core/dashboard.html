@@ -1,0 +1,190 @@
+{% extends 'core/base.html' %}
+{% block title %}Dashboard | DocSeva{% endblock %}
+{% block content %}
+<div class="flex flex-wrap items-center justify-between gap-6 mb-10 animate-slide-up">
+  <div>
+    <div class="flex items-center gap-2 text-blue-600 font-black text-xs uppercase tracking-[0.2em] mb-2">
+      <i data-lucide="layout-dashboard" class="w-4 h-4"></i> Citizen Portal
+    </div>
+    <h1 class="text-4xl font-black text-slate-900 tracking-tight">Welcome, {{ profile.display_name }}</h1>
+    <p class="text-slate-500 mt-1">Here is an overview of your secure vault.</p>
+  </div>
+  <div class="flex gap-3">
+    <a href="{% url 'emergency_qr' %}" class="btn-modern btn-outline border-red-200 text-red-600 hover:bg-red-50 hover:border-red-300">
+      <i data-lucide="qr-code" class="w-5 h-5"></i> Emergency QR
+    </a>
+    <a href="{% url 'document' %}" class="btn-modern btn-primary shadow-lg shadow-blue-200">
+      <i data-lucide="plus" class="w-5 h-5"></i> Upload Document
+    </a>
+  </div>
+</div>
+
+<!-- Stats Grid -->
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-10 animate-slide-up animate-delay-1">
+  <div class="stat-card group hover:border-blue-200 transition-colors">
+    <div class="icon-box bg-blue-50 text-blue-600 group-hover:scale-110 transition-transform">
+      <i data-lucide="file-text" class="w-6 h-6"></i>
+    </div>
+    <p class="text-slate-400 text-xs font-black uppercase tracking-widest mb-1">Total Documents</p>
+    <p class="text-3xl font-black text-slate-900">{{ documents_count }}</p>
+  </div>
+  <div class="stat-card group hover:border-amber-200 transition-colors">
+    <div class="icon-box bg-amber-50 text-amber-600 group-hover:scale-110 transition-transform">
+      <i data-lucide="ticket" class="w-6 h-6"></i>
+    </div>
+    <p class="text-slate-400 text-xs font-black uppercase tracking-widest mb-1">Open Tickets</p>
+    <p class="text-3xl font-black text-slate-900">{{ open_tickets }}</p>
+  </div>
+  <div class="stat-card group hover:border-indigo-200 transition-colors">
+    <div class="icon-box bg-indigo-50 text-indigo-600 group-hover:scale-110 transition-transform">
+      <i data-lucide="bell" class="w-6 h-6"></i>
+    </div>
+    <p class="text-slate-400 text-xs font-black uppercase tracking-widest mb-1">Unread Alerts</p>
+    <p class="text-3xl font-black text-slate-900">{{ notifications_count }}</p>
+  </div>
+  <div class="stat-card group hover:border-emerald-200 transition-colors">
+    <div class="icon-box bg-emerald-50 text-emerald-600 group-hover:scale-110 transition-transform">
+      <i data-lucide="hard-drive" class="w-6 h-6"></i>
+    </div>
+    <p class="text-slate-400 text-xs font-black uppercase tracking-widest mb-1">Vault Storage</p>
+    <div class="flex items-baseline gap-2">
+      <p class="text-3xl font-black text-slate-900">{{ storage_used_percent }}%</p>
+      <p class="text-xs text-slate-500">{{ storage_used_mb }} MB used</p>
+    </div>
+    <div class="mt-4 h-1.5 w-full bg-slate-100 rounded-full overflow-hidden">
+      <div class="h-full bg-emerald-500 transition-all duration-1000" style="width: {{ storage_used_percent }}%"></div>
+    </div>
+  </div>
+</div>
+
+{% if expired_documents or expiring_documents %}
+<section class="mb-10 animate-slide-up animate-delay-2">
+  <div class="glass-3d p-6 border-amber-200 bg-amber-50/50">
+    <div class="flex items-center justify-between mb-6">
+      <div class="flex items-center gap-3 text-amber-800">
+        <div class="p-2 rounded-xl bg-amber-100">
+          <i data-lucide="alert-triangle" class="w-6 h-6"></i>
+        </div>
+        <h2 class="font-black text-2xl tracking-tight">Renewal Attention Required</h2>
+      </div>
+      <a href="{% url 'document' %}?status=expiring" class="btn-modern btn-outline bg-white py-2 text-sm">
+        View All Alerts
+      </a>
+    </div>
+    <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+      {% for doc in expired_documents %}
+        <div class="card-3d p-5 border-red-100">
+          <div class="flex justify-between items-start mb-4">
+            <span class="badge bg-red-100 text-red-700">Expired</span>
+            <p class="text-xs text-red-600 font-bold">{{ doc.expiry_date|date:'M d, Y' }}</p>
+          </div>
+          <p class="font-black text-slate-900 text-lg mb-4">{{ doc.title }}</p>
+          <a href="{% url 'document_renewal' doc.id %}" class="btn-modern btn-primary w-full py-2 text-sm">
+            Renew Now <i data-lucide="refresh-cw" class="w-4 h-4"></i>
+          </a>
+        </div>
+      {% endfor %}
+      {% for doc in expiring_documents %}
+        <div class="card-3d p-5 border-amber-100">
+          <div class="flex justify-between items-start mb-4">
+            <span class="badge bg-amber-100 text-amber-700">Expiring Soon</span>
+            <p class="text-xs text-amber-600 font-bold">{{ doc.days_until_expiry }} days left</p>
+          </div>
+          <p class="font-black text-slate-900 text-lg mb-4">{{ doc.title }}</p>
+          <a href="{% url 'document_renewal' doc.id %}" class="btn-modern btn-outline w-full py-2 text-sm hover:bg-amber-50">
+            View Renewal Plan
+          </a>
+        </div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+{% endif %}
+
+<div class="grid lg:grid-cols-3 gap-8 animate-slide-up animate-delay-3">
+  <!-- Recent Documents -->
+  <section class="lg:col-span-2 card-3d p-8">
+    <div class="flex items-center justify-between mb-8">
+      <h2 class="font-black text-2xl tracking-tight">Recent Vault Activity</h2>
+      <a href="{% url 'document' %}" class="text-blue-600 font-bold text-sm hover:underline">View All Documents</a>
+    </div>
+    <div class="overflow-x-auto">
+      <table class="modern-table">
+        <thead>
+          <tr>
+            <th>Document</th>
+            <th>Category</th>
+            <th>Size</th>
+            <th>Status</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for doc in recent_documents %}
+            <tr class="group">
+              <td class="font-bold text-slate-900">{{ doc.title }}</td>
+              <td><span class="badge bg-slate-100 text-slate-600">{{ doc.get_category_display }}</span></td>
+              <td class="text-slate-500 text-sm">{{ doc.get_size_display }}</td>
+              <td>
+                {% if doc.expiry_date %}
+                  {% if doc.is_expired %}
+                    <span class="badge bg-red-100 text-red-600">Expired</span>
+                  {% else %}
+                    <span class="text-xs font-bold text-slate-400">Exp {{ doc.expiry_date|date:'M d' }}</span>
+                  {% endif %}
+                {% else %}
+                  <span class="text-xs font-bold text-slate-300">No Expiry</span>
+                {% endif %}
+              </td>
+              <td class="text-right">
+                <a href="{% url 'document_detail' doc.id %}" class="p-2 rounded-lg bg-slate-50 text-slate-400 group-hover:bg-blue-600 group-hover:text-white transition-all inline-block">
+                  <i data-lucide="chevron-right" class="w-4 h-4"></i>
+                </a>
+              </td>
+            </tr>
+          {% empty %}
+            <tr>
+              <td colspan="5" class="py-12 text-center">
+                <div class="flex flex-col items-center gap-3 text-slate-400">
+                  <i data-lucide="file-question" class="w-12 h-12 opacity-20"></i>
+                  <p class="font-bold">No documents uploaded yet</p>
+                  <a href="{% url 'document' %}" class="text-blue-600 text-sm hover:underline">Start by uploading one</a>
+                </div>
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- Security Logs -->
+  <section class="card-3d p-8">
+    <div class="flex items-center justify-between mb-8">
+      <h2 class="font-black text-2xl tracking-tight">Security</h2>
+      <i data-lucide="shield-check" class="w-6 h-6 text-slate-300"></i>
+    </div>
+    <div class="space-y-6">
+      {% for log in security_logs %}
+        <div class="flex gap-4 group">
+          <div class="shrink-0 w-1 bg-slate-100 rounded-full group-hover:bg-blue-400 transition-colors"></div>
+          <div>
+            <p class="font-bold text-slate-900">{{ log.title }}</p>
+            <div class="flex items-center gap-2 mt-1">
+              <span class="text-[10px] font-black uppercase tracking-widest px-2 py-0.5 rounded bg-slate-50 text-slate-400">{{ log.status }}</span>
+              <span class="text-xs text-slate-400">{{ log.timestamp|date:'M d, H:i' }}</span>
+            </div>
+          </div>
+        </div>
+      {% empty %}
+        <p class="text-slate-400 text-sm text-center py-8">No security logs recorded yet.</p>
+      {% endfor %}
+    </div>
+    <div class="mt-8 pt-6 border-t border-slate-50">
+      <a href="{% url 'security' %}" class="btn-modern btn-outline w-full py-3 text-sm">
+        View Full Security Audit
+      </a>
+    </div>
+  </section>
+</div>
+{% endblock %}

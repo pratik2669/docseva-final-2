@@ -1,0 +1,196 @@
+{% extends 'core/admin/base_admin.html' %}
+{% block title %}Admin Dashboard | DocSeva{% endblock %}
+{% block content %}
+<div class="mb-10 animate-slide-up">
+  <div class="flex items-center gap-2 text-blue-600 font-black text-xs uppercase tracking-[0.2em] mb-2">
+    <i data-lucide="layout-dashboard" class="w-4 h-4"></i> System Control
+  </div>
+  <h1 class="text-4xl font-black text-slate-900 tracking-tight">Operations Overview</h1>
+  <p class="text-slate-500 mt-1">Global summary of users, documents, and system health.</p>
+</div>
+
+<!-- Global Stats -->
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-10 animate-slide-up animate-delay-1">
+  <a href="{% url 'admin_users' %}" class="stat-card group hover:border-blue-300 transition-all border-2 border-transparent">
+    <div class="icon-box bg-blue-50 text-blue-600 group-hover:scale-110 transition-transform">
+      <i data-lucide="users" class="w-6 h-6"></i>
+    </div>
+    <p class="text-slate-400 text-[10px] font-black uppercase tracking-widest mb-1">Total Users</p>
+    <p class="text-3xl font-black text-slate-900">{{ total_users }}</p>
+    <div class="mt-4 pt-4 border-t border-slate-50 text-[10px] font-bold text-slate-500 flex flex-wrap gap-2">
+      <span class="text-emerald-600">{{ active_users }} Active</span>
+      <span>•</span>
+      <span>{{ portal_admins }} Admins</span>
+    </div>
+  </a>
+
+  <a href="{% url 'admin_documents' %}" class="stat-card group hover:border-indigo-300 transition-all border-2 border-transparent">
+    <div class="icon-box bg-indigo-50 text-indigo-600 group-hover:scale-110 transition-transform">
+      <i data-lucide="file-text" class="w-6 h-6"></i>
+    </div>
+    <p class="text-slate-400 text-[10px] font-black uppercase tracking-widest mb-1">Vault Storage</p>
+    <p class="text-3xl font-black text-slate-900">{{ total_documents }}</p>
+    <p class="mt-4 text-xs font-bold text-slate-500 italic">{{ storage_used_mb }} MB total usage</p>
+  </a>
+
+  <a href="{% url 'admin_tickets' %}" class="stat-card group hover:border-amber-300 transition-all border-2 border-transparent">
+    <div class="icon-box bg-amber-50 text-amber-600 group-hover:scale-110 transition-transform">
+      <i data-lucide="ticket" class="w-6 h-6"></i>
+    </div>
+    <p class="text-slate-400 text-[10px] font-black uppercase tracking-widest mb-1">Open Tickets</p>
+    <p class="text-3xl font-black text-amber-600">{{ open_tickets }}</p>
+    <p class="mt-4 text-xs font-bold text-slate-500">{{ total_tickets }} lifetime total</p>
+  </a>
+
+  <a href="{% url 'admin_appointments' %}" class="stat-card group hover:border-emerald-300 transition-all border-2 border-transparent">
+    <div class="icon-box bg-emerald-50 text-emerald-600 group-hover:scale-110 transition-transform">
+      <i data-lucide="calendar" class="w-6 h-6"></i>
+    </div>
+    <p class="text-slate-400 text-[10px] font-black uppercase tracking-widest mb-1">Appointments</p>
+    <p class="text-3xl font-black text-slate-900">{{ total_appointments }}</p>
+    <p class="mt-4 text-xs font-bold text-emerald-600 flex items-center gap-1">
+      <i data-lucide="trending-up" class="w-3 h-3"></i> System active
+    </p>
+  </a>
+</div>
+
+{% if expiring_documents %}
+<section class="mb-10 animate-slide-up animate-delay-2">
+  <div class="glass-3d p-6 border-amber-200 bg-amber-50/50">
+    <div class="flex items-center gap-3 text-amber-800 mb-6">
+      <i data-lucide="bell-ring" class="w-6 h-6"></i>
+      <h2 class="font-black text-xl tracking-tight">System Expiry Alerts</h2>
+    </div>
+    <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+      {% for doc in expiring_documents %}
+        <div class="p-4 rounded-xl bg-white border border-amber-100 shadow-sm flex items-center justify-between group hover:border-amber-400 transition-colors">
+          <div>
+            <p class="font-black text-slate-900 text-sm truncate w-40">{{ doc.title }}</p>
+            <p class="text-[10px] text-slate-400 font-bold uppercase tracking-widest">{{ doc.user.username }}</p>
+          </div>
+          <div class="text-right">
+            <p class="text-xs font-black text-amber-600">{{ doc.expiry_date|date:'M d' }}</p>
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+{% endif %}
+
+<div class="grid lg:grid-cols-2 gap-8 animate-slide-up animate-delay-3">
+  <!-- Recent Activity Panels -->
+  <section class="card-3d p-8">
+    <div class="flex items-center justify-between mb-8">
+      <h2 class="font-black text-xl text-slate-900 flex items-center gap-2">
+        <i data-lucide="user-plus" class="w-5 h-5 text-blue-500"></i> New Users
+      </h2>
+      <a href="{% url 'admin_users' %}" class="text-xs font-black uppercase tracking-widest text-blue-600 hover:underline">Full Directory</a>
+    </div>
+    <div class="space-y-4">
+      {% for item in recent_users %}
+        <div class="flex items-center justify-between p-4 rounded-2xl bg-slate-50 border border-slate-100 hover:border-blue-200 transition-all group">
+          <div class="flex items-center gap-4">
+            <div class="h-10 w-10 rounded-xl bg-white border border-slate-200 flex items-center justify-center text-slate-400 font-bold group-hover:text-blue-600">
+              {{ item.username|slice:":1"|upper }}
+            </div>
+            <div>
+              <p class="font-black text-slate-900">{{ item.username }}</p>
+              <p class="text-xs text-slate-400">{{ item.email|default:'No email set' }}</p>
+            </div>
+          </div>
+          <div class="flex items-center gap-3">
+            <span class="badge bg-slate-100 text-slate-600">{{ item.profile.role_label }}</span>
+            <a href="{% url 'admin_user_detail' item.id %}" class="p-2 rounded-lg hover:bg-blue-600 hover:text-white text-slate-400 transition-all">
+              <i data-lucide="settings" class="w-4 h-4"></i>
+            </a>
+          </div>
+        </div>
+      {% empty %}
+        <p class="text-slate-400 text-center py-8 text-sm italic">No users registered yet.</p>
+      {% endfor %}
+    </div>
+  </section>
+
+  <section class="card-3d p-8">
+    <div class="flex items-center justify-between mb-8">
+      <h2 class="font-black text-xl text-slate-900 flex items-center gap-2">
+        <i data-lucide="message-square" class="w-5 h-5 text-amber-500"></i> Active Tickets
+      </h2>
+      <a href="{% url 'admin_tickets' %}" class="text-xs font-black uppercase tracking-widest text-amber-600 hover:underline">View All</a>
+    </div>
+    <div class="space-y-4">
+      {% for ticket in recent_tickets %}
+        <div class="flex items-center justify-between p-4 rounded-2xl bg-slate-50 border border-slate-100 hover:border-amber-200 transition-all group">
+          <div class="min-w-0">
+            <div class="flex items-center gap-2 mb-1">
+              <span class="text-[10px] font-black uppercase tracking-widest text-slate-400">#{{ ticket.id }}</span>
+              <span class="badge 
+                {% if ticket.status == 'OPEN' %}bg-amber-100 text-amber-700{% else %}bg-slate-100 text-slate-600{% endif %}">
+                {{ ticket.status }}
+              </span>
+            </div>
+            <p class="font-black text-slate-900 truncate">{{ ticket.subject }}</p>
+            <p class="text-xs text-slate-400">by {{ ticket.user.username }}</p>
+          </div>
+          <a href="{% url 'admin_ticket_detail' ticket.id %}" class="p-2 rounded-lg hover:bg-amber-600 hover:text-white text-slate-400 transition-all">
+            <i data-lucide="external-link" class="w-4 h-4"></i>
+          </a>
+        </div>
+      {% empty %}
+        <p class="text-slate-400 text-center py-8 text-sm italic">No open tickets at the moment.</p>
+      {% endfor %}
+    </div>
+  </section>
+
+  <section class="card-3d p-8">
+    <div class="flex items-center justify-between mb-8">
+      <h2 class="font-black text-xl text-slate-900 flex items-center gap-2">
+        <i data-lucide="file-check" class="w-5 h-5 text-emerald-500"></i> Latest Vault Additions
+      </h2>
+    </div>
+    <div class="space-y-4">
+      {% for doc in recent_documents %}
+        <div class="flex items-center justify-between p-4 rounded-2xl bg-slate-50 border border-slate-100 transition-all">
+          <div class="flex items-center gap-4">
+            <div class="h-10 w-10 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center">
+              <i data-lucide="file" class="w-5 h-5"></i>
+            </div>
+            <div>
+              <p class="font-black text-slate-900 text-sm truncate w-48">{{ doc.title }}</p>
+              <p class="text-[10px] text-slate-400 font-bold uppercase tracking-widest">by {{ doc.user.username }}</p>
+            </div>
+          </div>
+          <span class="text-[10px] font-black text-slate-400 bg-white px-2 py-1 rounded-lg border border-slate-100">{{ doc.get_size_display }}</span>
+        </div>
+      {% endfor %}
+    </div>
+  </section>
+
+  <section class="card-3d p-8">
+    <div class="flex items-center justify-between mb-8">
+      <h2 class="font-black text-xl text-slate-900 flex items-center gap-2">
+        <i data-lucide="shield" class="w-5 h-5 text-slate-400"></i> Global Security
+      </h2>
+      <a href="{% url 'admin_security' %}" class="text-xs font-black uppercase tracking-widest text-slate-400 hover:underline">Full Audit</a>
+    </div>
+    <div class="space-y-4">
+      {% for log in recent_logs %}
+        <div class="flex items-start gap-4 p-3 rounded-xl bg-slate-50 border border-slate-100">
+          <div class="shrink-0 w-1 bg-slate-300 rounded-full h-8 mt-1"></div>
+          <div>
+            <p class="font-bold text-slate-900 text-xs">{{ log.title }}</p>
+            <div class="flex items-center gap-2 mt-1 text-[10px] font-black uppercase tracking-widest text-slate-400">
+              <span class="text-blue-500">{{ log.user.username|default:'System' }}</span>
+              <span>•</span>
+              <span>{{ log.timestamp|date:'H:i' }}</span>
+              <span>•</span>
+              <span class="{% if log.status == 'failed' %}text-red-500{% else %}text-emerald-500{% endif %}">{{ log.status }}</span>
+            </div>
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+  </section>
+</div>
+{% endblock %}

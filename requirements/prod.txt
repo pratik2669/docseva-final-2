@@ -1,0 +1,14 @@
+-r base.txt
+psycopg[binary]>=3.2
+gunicorn>=22.0
+whitenoise>=6.6
+django-ratelimit>=4.1
+django-csp>=3.8
+django-structlog>=8.0
+django-redis>=5.4
+redis>=5.0
+sentry-sdk[django,redis]>=2.0
+celery[redis]>=5.4
+django-celery-beat>=2.6       # Periodic task scheduling (DB-backed)
+django-celery-results>=2.5    # Task result storage & admin inspection
+django-storages[boto3]>=1.14

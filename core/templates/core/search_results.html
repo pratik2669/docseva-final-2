@@ -1,0 +1,95 @@
+{% extends 'core/base.html' %}
+{% block title %}Search | DocSeva{% endblock %}
+{% block content %}
+<div class="mb-10 animate-slide-up">
+  <div class="flex items-center gap-2 text-blue-600 font-black text-xs uppercase tracking-[0.2em] mb-2">
+    <i data-lucide="search" class="w-4 h-4"></i> Global Search
+  </div>
+  <h1 class="text-4xl font-black text-slate-900 tracking-tight">Results for “<span class="text-blue-600">{{ query }}</span>”</h1>
+  <p class="text-slate-500 mt-1">We found matches across your documents, tickets, and appointments.</p>
+</div>
+
+<div class="space-y-12 animate-slide-up animate-delay-1">
+  <!-- Documents Section -->
+  <section class="card-3d p-8">
+    <div class="flex items-center justify-between mb-8">
+      <h2 class="text-2xl font-black text-slate-900 tracking-tight flex items-center gap-3">
+        <i data-lucide="file-text" class="w-6 h-6 text-blue-600"></i> Matching Documents
+      </h2>
+      <span class="badge bg-blue-50 text-blue-700">{{ documents|length }} matches</span>
+    </div>
+    
+    <div class="grid md:grid-cols-2 gap-4">
+      {% for doc in documents %}
+        <div class="group flex items-center justify-between p-4 rounded-2xl bg-slate-50 border border-slate-100 hover:border-blue-200 transition-all hover:bg-white hover:shadow-lg">
+          <div class="flex items-center gap-4">
+            <div class="h-10 w-10 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center group-hover:scale-110 transition-transform">
+              <i data-lucide="file" class="w-5 h-5"></i>
+            </div>
+            <div>
+              <p class="font-black text-slate-900">{{ doc.title }}</p>
+              <p class="text-xs text-slate-500">{{ doc.get_category_display }} • {{ doc.source|default:'Manual' }}</p>
+            </div>
+          </div>
+          <a href="{% url 'document_detail' doc.id %}" class="p-2 rounded-lg bg-slate-100 text-slate-400 group-hover:bg-blue-600 group-hover:text-white transition-all">
+            <i data-lucide="arrow-right" class="w-4 h-4"></i>
+          </a>
+        </div>
+      {% empty %}
+        <div class="md:col-span-2 py-8 text-center text-slate-400 italic">No matching documents found.</div>
+      {% endfor %}
+    </div>
+  </section>
+
+  <!-- Tickets Section -->
+  <section class="card-3d p-8">
+    <div class="flex items-center justify-between mb-8">
+      <h2 class="text-2xl font-black text-slate-900 tracking-tight flex items-center gap-3">
+        <i data-lucide="ticket" class="w-6 h-6 text-amber-600"></i> Support Tickets
+      </h2>
+      <span class="badge bg-amber-50 text-amber-700">{{ tickets|length }} matches</span>
+    </div>
+    
+    <div class="grid md:grid-cols-2 gap-4">
+      {% for ticket in tickets %}
+        <div class="p-4 rounded-2xl bg-slate-50 border border-slate-100 hover:border-amber-200 transition-colors">
+          <div class="flex items-center justify-between mb-2">
+            <span class="text-[10px] font-black uppercase tracking-widest text-slate-400">#{{ ticket.id }}</span>
+            <span class="badge bg-amber-50 text-amber-700">{{ ticket.status }}</span>
+          </div>
+          <p class="font-black text-slate-900">{{ ticket.subject }}</p>
+        </div>
+      {% empty %}
+        <div class="md:col-span-2 py-8 text-center text-slate-400 italic">No matching support tickets.</div>
+      {% endfor %}
+    </div>
+  </section>
+
+  <!-- Appointments Section -->
+  <section class="card-3d p-8">
+    <div class="flex items-center justify-between mb-8">
+      <h2 class="text-2xl font-black text-slate-900 tracking-tight flex items-center gap-3">
+        <i data-lucide="calendar" class="w-6 h-6 text-indigo-600"></i> Appointments
+      </h2>
+      <span class="badge bg-indigo-50 text-indigo-700">{{ appointments|length }} matches</span>
+    </div>
+    
+    <div class="grid md:grid-cols-2 gap-4">
+      {% for appt in appointments %}
+        <div class="p-4 rounded-2xl bg-slate-50 border border-slate-100 hover:border-indigo-200 transition-colors">
+          <p class="font-black text-slate-900 mb-1">{{ appt.doctor_name }}</p>
+          <p class="text-xs text-slate-500">{{ appt.department|default:'General' }} • {{ appt.datetime|date:'M d, Y' }}</p>
+        </div>
+      {% empty %}
+        <div class="md:col-span-2 py-8 text-center text-slate-400 italic">No matching appointments found.</div>
+      {% endfor %}
+    </div>
+  </section>
+</div>
+
+<div class="mt-12 text-center">
+  <a href="{% url 'dashboard' %}" class="btn-modern btn-outline py-4 px-10 border-slate-200">
+    <i data-lucide="home" class="w-5 h-5"></i> Return to Dashboard
+  </a>
+</div>
+{% endblock %}

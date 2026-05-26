@@ -1,0 +1,115 @@
+# DocSeva – docker-compose for local/staging use
+# For production, prefer the platform's managed Postgres + Redis
+# and deploy the web service as a standalone container.
+
+services:
+  db:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: docseva
+      POSTGRES_USER: docseva
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-change_this_in_prod}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U docseva"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    # Don't expose Postgres port publicly in production
+    # ports:
+    #   - "5432:5432"
+
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+    command: ["redis-server", "--save", "60", "1", "--loglevel", "warning"]
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  web:
+    build:
+      context: .
+      target: runtime
+    restart: unless-stopped
+    env_file: .env
+    environment:
+      DEBUG: "False"
+      DATABASE_URL: postgres://docseva:${POSTGRES_PASSWORD:-change_this_in_prod}@db:5432/docseva
+      REDIS_URL: redis://redis:6379/0
+      ALLOWED_HOSTS: localhost,127.0.0.1
+      CSRF_TRUSTED_ORIGINS: http://localhost:8000
+      SECURE_SSL_REDIRECT: "False"
+      USE_X_FORWARDED_HOST: "False"
+    ports:
+      - "8000:8000"
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    volumes:
+      - media_data:/app/media
+    # Read-only root filesystem; only /app/media and /tmp are writable
+    read_only: true
+    tmpfs:
+      - /tmp
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost:8000/healthz/ || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+
+  celery-worker:
+    build:
+      context: .
+      target: runtime
+    restart: unless-stopped
+    env_file: .env
+    environment:
+      DEBUG: "False"
+      DATABASE_URL: postgres://docseva:${POSTGRES_PASSWORD:-change_this_in_prod}@db:5432/docseva
+      REDIS_URL: redis://redis:6379/0
+      CELERY_BROKER_URL: redis://redis:6379/1
+      CELERY_RESULT_BACKEND: redis://redis:6379/1
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    command: ["celery", "-A", "docseva", "worker", "--loglevel=INFO"]
+    volumes:
+      - media_data:/app/media
+
+  celery-beat:
+    build:
+      context: .
+      target: runtime
+    restart: unless-stopped
+    env_file: .env
+    environment:
+      DEBUG: "False"
+      DATABASE_URL: postgres://docseva:${POSTGRES_PASSWORD:-change_this_in_prod}@db:5432/docseva
+      REDIS_URL: redis://redis:6379/0
+      CELERY_BROKER_URL: redis://redis:6379/1
+      CELERY_RESULT_BACKEND: redis://redis:6379/1
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    command: ["celery", "-A", "docseva", "beat", "--loglevel=INFO"]
+    volumes:
+      - media_data:/app/media
+
+volumes:
+  postgres_data:
+  redis_data:
+  media_data:

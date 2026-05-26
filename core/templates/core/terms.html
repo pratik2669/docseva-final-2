@@ -1,0 +1,24 @@
+{% extends 'core/base.html' %}
+{% block title %}Terms of Service | DocSeva{% endblock %}
+{% block content %}
+<section class="py-16 lg:py-24 animate-slide-up">
+  <div class="max-w-4xl">
+    <span class="badge bg-blue-50 text-blue-700 mb-6">Terms of Service</span>
+    <h1 class="text-5xl md:text-6xl font-black tracking-tight leading-tight mb-6">Use DocSeva responsibly.</h1>
+    <p class="text-xl text-slate-500 leading-relaxed">This is starter terms content for a deployable project. Replace it with reviewed legal terms before production business use.</p>
+  </div>
+</section>
+
+<section class="card-3d p-8 lg:p-12 mb-12 animate-slide-up animate-delay-1 prose-policy">
+  <h2>Permitted use</h2>
+  <p>Use the service to store, organize, and manage documents that you own or are authorized to manage.</p>
+  <h2>User responsibility</h2>
+  <p>You are responsible for the accuracy of uploaded information, expiry dates, emergency details, and document-sharing decisions.</p>
+  <h2>Government-service demo flows</h2>
+  <p>ABHA, Ayushman Bharat, and government API flows are demo/mock workflows unless GOV_API_MODE is connected to approved live integrations.</p>
+  <h2>Account security</h2>
+  <p>Use a strong password and log out on shared devices. Administrators should assign the minimum required role for each staff member.</p>
+  <h2>Production launch</h2>
+  <p>Before a public launch, configure domain, SMTP, database backups, monitoring, and reviewed privacy/legal pages.</p>
+</section>
+{% endblock %}

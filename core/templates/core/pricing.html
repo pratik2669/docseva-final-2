@@ -1,0 +1,31 @@
+{% extends 'core/base.html' %}
+{% block title %}Pricing | DocSeva{% endblock %}
+{% block structured_data %}
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"Product","name":"DocSeva","description":"Secure document vault with renewal tracking and emergency QR workflows","offers":{"@type":"AggregateOffer","lowPrice":"0","priceCurrency":"INR"}}
+</script>
+{% endblock %}
+{% block content %}
+<section class="py-16 lg:py-24 animate-slide-up">
+  <span class="badge bg-blue-50 text-blue-700 mb-6">Pricing</span>
+  <h1 class="text-5xl md:text-6xl font-black tracking-tight leading-tight mb-6">Start simple. Upgrade when operations need more control.</h1>
+  <p class="text-xl text-slate-500 max-w-3xl leading-relaxed">Pricing is a deployer-editable template. Connect real billing only after legal review, payment gateway setup, and production data protection controls.</p>
+</section>
+<section class="grid lg:grid-cols-3 gap-8 mb-16">
+  {% for plan in plans %}
+    <article class="card-3d p-8 {% if forloop.counter == 2 %}ring-4 ring-blue-100{% endif %}">
+      <p class="text-sm font-black text-blue-600 uppercase tracking-widest mb-2">{{ plan.name }}</p>
+      <h2 class="text-4xl font-black mb-3">{{ plan.price }}</h2>
+      <p class="text-slate-500 mb-6">{{ plan.description }}</p>
+      <ul class="space-y-3 mb-8 text-sm text-slate-600 font-semibold">
+        {% for feature in plan.features %}<li class="flex gap-2"><i data-lucide="check" class="w-5 h-5 text-emerald-600"></i>{{ feature }}</li>{% endfor %}
+      </ul>
+      <a href="{% url 'registration' %}" class="btn-modern btn-primary w-full">Choose Plan</a>
+    </article>
+  {% endfor %}
+</section>
+<section class="glass-3d p-8 lg:p-12">
+  <h2 class="text-3xl font-black mb-4">Production billing note</h2>
+  <p class="text-slate-500 leading-relaxed">This page is ready for UI and SEO, but payments are intentionally not enabled. Add Razorpay/Stripe only after plan models, invoices, refund terms, webhook verification, and audit logs are finalized.</p>
+</section>
+{% endblock %}

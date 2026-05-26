@@ -1,0 +1,202 @@
+# DocSeva – Render.com deployment blueprint
+# https://render.com/docs/blueprint-spec
+#
+# BEFORE FIRST DEPLOY — set these in Render Dashboard > Environment:
+#   - ALLOWED_HOSTS         e.g. docseva.onrender.com
+#   - CSRF_TRUSTED_ORIGINS  e.g. https://docseva.onrender.com
+#   - PUBLIC_BASE_URL       e.g. https://docseva.onrender.com
+#   - EMAIL_HOST / EMAIL_HOST_USER / EMAIL_HOST_PASSWORD
+#   - GOV_API_MODE          set to "live" when ready (default: mock)
+#
+# NOTE: Change plan: free → starter/standard when you're ready to upgrade.
+
+services:
+
+  # ── Web Service (Django + Gunicorn via Docker) ─────────────────────────────
+  - type: web
+    name: docseva
+    env: docker
+    dockerfilePath: ./Dockerfile
+    dockerContext: .
+    plan: free
+    healthCheckPath: /healthz/
+    autoDeploy: true
+    envVars:
+      - key: DEBUG
+        value: "False"
+      - key: SECRET_KEY
+        generateValue: true
+      # ⚠️ REQUIRED: Set in Render Dashboard before deploying
+      - key: ALLOWED_HOSTS
+        value: "docseva.onrender.com"   # Update if you use a custom domain
+      # ⚠️ REQUIRED: Must include https:// prefix
+      - key: CSRF_TRUSTED_ORIGINS
+        value: "https://docseva.onrender.com"  # Update if custom domain
+      # ⚠️ REQUIRED for QR codes and share links to work
+      - key: PUBLIC_BASE_URL
+        value: "https://docseva.onrender.com"  # Update if custom domain
+      - key: DATABASE_URL
+        fromDatabase:
+          name: docseva-db
+          property: connectionString
+      - key: REDIS_URL
+        fromService:
+          type: redis
+          name: docseva-redis
+          property: connectionString
+      - key: DATABASE_SSL_REQUIRE
+        value: "True"
+      - key: SECURE_SSL_REDIRECT
+        value: "True"
+      - key: USE_X_FORWARDED_HOST
+        value: "True"
+      - key: GUNICORN_WORKERS
+        value: "2"  # Free tier: 2 workers max to avoid OOM
+      # ── Email (set real values in dashboard) ─────────────────────────────
+      - key: EMAIL_BACKEND
+        value: django.core.mail.backends.smtp.EmailBackend
+      - key: EMAIL_HOST
+        sync: false  # e.g. smtp.sendgrid.net / smtp.mailgun.org
+      - key: EMAIL_PORT
+        value: "587"
+      - key: EMAIL_HOST_USER
+        sync: false
+      - key: EMAIL_HOST_PASSWORD
+        sync: false
+      - key: EMAIL_USE_TLS
+        value: "True"
+      - key: DEFAULT_FROM_EMAIL
+        sync: false  # e.g. DocSeva <noreply@yourdomain.com>
+      - key: ADMINS
+        sync: false  # Comma-separated admin emails for 500 error alerts
+      # ── Rate limiting ─────────────────────────────────────────────────────
+      - key: RATELIMIT_ENABLE
+        value: "True"
+      # ── Gov API (set to "live" when ready for real integration) ───────────
+      - key: GOV_API_MODE
+        value: "mock"  # ⚠️ Change to "live" when gov API credentials are ready
+      # ── Media storage: S3/R2 (REQUIRED for persistent file storage) ───────
+      # Render's filesystem is ephemeral — files are lost on every redeploy.
+      # Enable S3-compatible storage (Cloudflare R2 is free for small usage):
+      - key: USE_S3_MEDIA
+        value: "False"  # ⚠️ Change to "True" and set AWS_* vars below
+      - key: AWS_ACCESS_KEY_ID
+        sync: false
+      - key: AWS_SECRET_ACCESS_KEY
+        sync: false
+      - key: AWS_STORAGE_BUCKET_NAME
+        sync: false
+      - key: AWS_S3_REGION_NAME
+        value: "ap-south-1"
+      - key: AWS_S3_ENDPOINT_URL
+        sync: false  # For Cloudflare R2: https://<account-id>.r2.cloudflarestorage.com
+      - key: AWS_QUERYSTRING_AUTH
+        value: "True"
+      # ── Sentry monitoring (optional but recommended) ──────────────────────
+      - key: SENTRY_DSN
+        sync: false
+      - key: SENTRY_ENVIRONMENT
+        value: "production"
+      - key: LOG_LEVEL
+        value: "INFO"
+      # ── Session & security ────────────────────────────────────────────────
+      - key: SESSION_COOKIE_AGE
+        value: "86400"  # 24 hours
+      - key: SECURE_HSTS_SECONDS
+        value: "31536000"
+
+  # ── Celery Worker (background tasks) ──────────────────────────────────────
+  - type: worker
+    name: docseva-celery-worker
+    env: docker
+    dockerfilePath: ./Dockerfile
+    dockerContext: .
+    plan: free
+    startCommand: celery -A docseva worker --loglevel=info --concurrency=2
+    envVars:
+      - key: DEBUG
+        value: "False"
+      - key: SECRET_KEY
+        fromService:
+          type: web
+          name: docseva
+          envVarKey: SECRET_KEY
+      - key: DATABASE_URL
+        fromDatabase:
+          name: docseva-db
+          property: connectionString
+      - key: REDIS_URL
+        fromService:
+          type: redis
+          name: docseva-redis
+          property: connectionString
+      - key: CELERY_TASK_ALWAYS_EAGER
+        value: "False"
+      - key: EMAIL_BACKEND
+        value: django.core.mail.backends.smtp.EmailBackend
+      - key: EMAIL_HOST
+        sync: false
+      - key: EMAIL_HOST_USER
+        sync: false
+      - key: EMAIL_HOST_PASSWORD
+        sync: false
+      - key: DEFAULT_FROM_EMAIL
+        sync: false
+      - key: USE_S3_MEDIA
+        value: "False"  # Mirror from web service
+      - key: AWS_ACCESS_KEY_ID
+        sync: false
+      - key: AWS_SECRET_ACCESS_KEY
+        sync: false
+      - key: AWS_STORAGE_BUCKET_NAME
+        sync: false
+      - key: AWS_S3_ENDPOINT_URL
+        sync: false
+      - key: LOG_LEVEL
+        value: "INFO"
+      - key: SKIP_COLLECTSTATIC
+        value: "True"  # Celery workers don't serve static files
+
+  # ── Celery Beat Scheduler (periodic tasks) ────────────────────────────────
+  - type: worker
+    name: docseva-celery-beat
+    env: docker
+    dockerfilePath: ./Dockerfile
+    dockerContext: .
+    plan: free
+    startCommand: celery -A docseva beat --loglevel=info --scheduler django_celery_beat.schedulers:DatabaseScheduler
+    envVars:
+      - key: DEBUG
+        value: "False"
+      - key: SECRET_KEY
+        fromService:
+          type: web
+          name: docseva
+          envVarKey: SECRET_KEY
+      - key: DATABASE_URL
+        fromDatabase:
+          name: docseva-db
+          property: connectionString
+      - key: REDIS_URL
+        fromService:
+          type: redis
+          name: docseva-redis
+          property: connectionString
+      - key: LOG_LEVEL
+        value: "INFO"
+      - key: SKIP_COLLECTSTATIC
+        value: "True"  # Beat scheduler doesn't serve static files
+
+  # ── Redis (cache + Celery broker) ─────────────────────────────────────────
+  - type: redis
+    name: docseva-redis
+    plan: free
+    ipAllowList: []
+
+databases:
+  # ── PostgreSQL ─────────────────────────────────────────────────────────────
+  # ⚠️ Free Render databases expire after 90 days. Upgrade to paid before launch.
+  - name: docseva-db
+    databaseName: docseva
+    user: docseva
+    plan: free

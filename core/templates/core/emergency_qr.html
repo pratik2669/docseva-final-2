@@ -1,0 +1,91 @@
+{% extends 'core/base.html' %}
+{% block title %}Emergency QR | DocSeva{% endblock %}
+{% block content %}
+<div class="max-w-xl mx-auto py-12 animate-slide-up">
+  <div class="card-3d p-8 md:p-12 text-center relative overflow-hidden">
+    <!-- Red Accent Background -->
+    <div class="absolute inset-x-0 top-0 h-2 bg-red-600"></div>
+    <div class="absolute top-0 right-0 w-32 h-32 bg-red-50 rounded-full -translate-y-1/2 translate-x-1/2 -z-10"></div>
+    
+    <div class="mb-10">
+      <div class="h-16 w-16 rounded-2xl bg-red-50 text-red-600 flex items-center justify-center mx-auto mb-6 shadow-lg shadow-red-50">
+        <i data-lucide="qr-code" class="w-8 h-8"></i>
+      </div>
+      <p class="text-[10px] font-black uppercase tracking-[0.3em] text-red-600 mb-2">Life-Saving Access</p>
+      <h1 class="text-3xl font-black text-slate-900 tracking-tight">{{ profile.display_name }}</h1>
+      <p class="text-slate-500 mt-2">Personal Emergency Medical Identity</p>
+    </div>
+
+    {% if not profile.emergency_share_enabled %}
+      <div class="bg-amber-50 border-2 border-amber-100 text-amber-900 rounded-2xl p-5 mb-10 flex gap-4 text-left animate-slide-up">
+        <i data-lucide="alert-triangle" class="w-6 h-6 shrink-0 mt-0.5"></i>
+        <div>
+          <p class="font-black text-sm">Sharing is currently Disabled</p>
+          <p class="text-xs mt-1 leading-relaxed opacity-80">This QR code will not resolve to a public page until you enable it in your <a href="{% url 'profile' %}" class="underline font-black">Profile Settings</a>.</p>
+        </div>
+      </div>
+    {% endif %}
+
+    <div class="relative group mx-auto w-fit mb-10">
+      <div class="absolute -inset-4 bg-gradient-to-tr from-red-100 to-indigo-100 rounded-[2.5rem] blur-2xl opacity-50 group-hover:opacity-100 transition-opacity"></div>
+      <div class="relative glass-3d p-6 bg-white border-white/50 shadow-2xl rounded-[2.5rem]">
+        <img class="w-64 h-64 md:w-80 md:h-80 rounded-2xl p-2 bg-white" src="{{ qr_data_uri }}" alt="Emergency QR code">
+      </div>
+      
+      {% if profile.emergency_share_enabled %}
+        <div class="absolute -bottom-3 -right-3 h-12 w-12 rounded-2xl bg-emerald-500 text-white flex items-center justify-center shadow-lg animate-bounce-slow">
+          <i data-lucide="shield-check" class="w-6 h-6"></i>
+        </div>
+      {% endif %}
+    </div>
+
+    <div class="space-y-4">
+      <div class="p-3 rounded-xl bg-slate-50 border border-slate-100 text-[10px] font-mono text-slate-400 break-all select-all">
+        {{ emergency_url }}
+      </div>
+      {% if "localhost" in emergency_url or "127.0.0.1" in emergency_url %}
+        <div class="p-4 rounded-2xl bg-amber-50 border border-amber-100 text-left text-xs text-amber-900 leading-relaxed">
+          <strong>Local phone scan note:</strong> another phone cannot open a localhost QR. Set <code>PUBLIC_BASE_URL=http://YOUR_LAPTOP_IP:8000</code> in <code>.env</code>, add that IP to <code>ALLOWED_HOSTS</code>, then run <code>python manage.py runserver 0.0.0.0:8000</code>.
+        </div>
+      {% endif %}
+      
+      <div class="grid grid-cols-2 gap-3">
+        <a href="{{ emergency_url }}" target="_blank" class="btn-modern btn-primary bg-red-600 hover:bg-red-700 shadow-xl shadow-red-100 text-sm py-4">
+          <i data-lucide="external-link" class="w-4 h-4"></i> Preview Page
+        </a>
+        <a href="{% url 'profile' %}" class="btn-modern btn-outline border-slate-200 text-slate-600 hover:bg-slate-50 text-sm py-4">
+          <i data-lucide="edit" class="w-4 h-4"></i> Update Info
+        </a>
+      </div>
+    </div>
+    
+    <div class="mt-10 pt-8 border-t border-slate-50 flex flex-col items-center gap-4">
+      <p class="text-xs text-slate-400 font-bold uppercase tracking-widest">Recommended Action</p>
+      <div class="flex gap-4">
+        <div class="flex flex-col items-center gap-2">
+          <div class="h-10 w-10 rounded-full bg-slate-50 flex items-center justify-center text-slate-400">
+            <i data-lucide="smartphone" class="w-5 h-5"></i>
+          </div>
+          <span class="text-[10px] font-black text-slate-400 uppercase">Screenshot</span>
+        </div>
+        <div class="flex flex-col items-center gap-2">
+          <div class="h-10 w-10 rounded-full bg-slate-50 flex items-center justify-center text-slate-400">
+            <i data-lucide="printer" class="w-5 h-5"></i>
+          </div>
+          <span class="text-[10px] font-black text-slate-400 uppercase">Print & Carry</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<style>
+  @keyframes bounce-slow {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-10px); }
+  }
+  .animate-bounce-slow {
+    animation: bounce-slow 3s infinite ease-in-out;
+  }
+</style>
+{% endblock %}

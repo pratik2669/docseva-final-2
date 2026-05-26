@@ -1,0 +1,199 @@
+{% extends 'core/base.html' %}
+{% block title %}DocSeva | Your Digital Document Vault{% endblock %}
+{% block content %}
+<!-- Hero Section -->
+<section class="relative py-20 lg:py-32 overflow-hidden">
+  <div class="grid lg:grid-cols-2 gap-12 items-center">
+    <div class="animate-slide-up">
+      <div class="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-blue-50 text-blue-700 text-sm font-black mb-8 border border-blue-100">
+        <span class="relative flex h-2 w-2">
+          <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
+          <span class="relative inline-flex rounded-full h-2 w-2 bg-blue-600"></span>
+        </span>
+        Secure & Private Citizen Document Help
+      </div>
+      <h1 class="text-5xl md:text-7xl font-black leading-[0.95] tracking-tight text-slate-900 mb-8">
+        Your documents,<br>organized and<br><span class="text-blue-600">always ready.</span>
+      </h1>
+      <p class="text-lg md:text-xl text-slate-500 mb-10 max-w-xl leading-relaxed">
+        DocSeva is a secure vault for your vital records. Manage renewals, set expiry alerts, and share emergency info with ease. Built for citizens who value privacy.
+      </p>
+      <div class="flex flex-wrap gap-4">
+        <a href="{% url 'registration' %}" class="btn-modern btn-primary text-lg px-8 py-4 shadow-xl shadow-blue-200">
+          Create Free Account <i data-lucide="arrow-right" class="w-5 h-5"></i>
+        </a>
+        <a href="{% url 'login' %}" class="btn-modern btn-outline text-lg px-8 py-4">
+          Login to Vault
+        </a>
+        <a href="#features" class="btn-modern btn-outline text-lg px-8 py-4 bg-white/60">
+          Explore Features
+        </a>
+        <a href="{% url 'pricing' %}" class="btn-modern btn-outline text-lg px-8 py-4 bg-white/60">
+          View Pricing
+        </a>
+      </div>
+    </div>
+
+    <!-- 3D Illustration Placeholder -->
+    <div class="relative animate-slide-up animate-delay-1 hidden lg:block">
+      <div class="absolute inset-0 bg-gradient-to-tr from-blue-400/20 to-indigo-400/20 rounded-[3rem] blur-3xl"></div>
+      <div class="relative grid grid-cols-2 gap-6 p-8">
+        <div class="card-3d p-6 bg-white/80 backdrop-blur-xl border-white/50 -rotate-3 hover:rotate-0 transition-transform cursor-default">
+          <div class="h-12 w-12 rounded-2xl bg-amber-100 text-amber-600 flex items-center justify-center mb-4">
+            <i data-lucide="clock" class="w-6 h-6"></i>
+          </div>
+          <p class="text-slate-400 text-xs font-black uppercase tracking-widest mb-1">Expiring Soon</p>
+          <p class="text-3xl font-black text-slate-900">12 Days</p>
+          <p class="text-sm text-slate-500 mt-2">Passport renewal alert</p>
+        </div>
+        <div class="card-3d p-6 bg-white/80 backdrop-blur-xl border-white/50 translate-y-12 rotate-3 hover:rotate-0 transition-transform cursor-default">
+          <div class="h-12 w-12 rounded-2xl bg-emerald-100 text-emerald-600 flex items-center justify-center mb-4">
+            <i data-lucide="check-circle" class="w-6 h-6"></i>
+          </div>
+          <p class="text-slate-400 text-xs font-black uppercase tracking-widest mb-1">Security</p>
+          <p class="text-3xl font-black text-slate-900">Encrypted</p>
+          <p class="text-sm text-slate-500 mt-2">Private vault storage</p>
+        </div>
+        <div class="card-3d p-6 bg-white/80 backdrop-blur-xl border-white/50 -translate-y-4 -rotate-6 hover:rotate-0 transition-transform cursor-default">
+          <div class="h-12 w-12 rounded-2xl bg-blue-100 text-blue-600 flex items-center justify-center mb-4">
+            <i data-lucide="qr-code" class="w-6 h-6"></i>
+          </div>
+          <p class="text-slate-400 text-xs font-black uppercase tracking-widest mb-1">Emergency</p>
+          <p class="text-3xl font-black text-slate-900">QR Ready</p>
+          <p class="text-sm text-slate-500 mt-2">Medical info share</p>
+        </div>
+        <div class="card-3d p-6 bg-white/80 backdrop-blur-xl border-white/50 translate-y-8 rotate-6 hover:rotate-0 transition-transform cursor-default">
+          <div class="h-12 w-12 rounded-2xl bg-indigo-100 text-indigo-600 flex items-center justify-center mb-4">
+            <i data-lucide="share-2" class="w-6 h-6"></i>
+          </div>
+          <p class="text-slate-400 text-xs font-black uppercase tracking-widest mb-1">Sharing</p>
+          <p class="text-3xl font-black text-slate-900">Active</p>
+          <p class="text-sm text-slate-500 mt-2">2 expiring share links</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Features Grid -->
+<section id="features" class="py-20">
+  <div class="text-center max-w-3xl mx-auto mb-16">
+    <h2 class="text-4xl font-black mb-4">Everything you need for document peace of mind.</h2>
+    <p class="text-slate-500 text-lg">Stop worrying about lost records or missed renewals. DocSeva provides a comprehensive suite of tools for the modern citizen.</p>
+  </div>
+  <div class="grid md:grid-cols-3 gap-8">
+    <div class="card-3d p-8">
+      <div class="h-14 w-14 rounded-2xl bg-blue-50 text-blue-600 flex items-center justify-center mb-6">
+        <i data-lucide="lock" class="w-8 h-8"></i>
+      </div>
+      <h3 class="text-xl font-black mb-3">Private Vault</h3>
+      <p class="text-slate-500 leading-relaxed">Your documents are yours. Upload, organize, and search with total privacy. No public access by default.</p>
+    </div>
+    <div class="card-3d p-8">
+      <div class="h-14 w-14 rounded-2xl bg-amber-50 text-amber-600 flex items-center justify-center mb-6">
+        <i data-lucide="bell-ring" class="w-8 h-8"></i>
+      </div>
+      <h3 class="text-xl font-black mb-3">Renewal Assistant</h3>
+      <p class="text-slate-500 leading-relaxed">Never miss an expiry date. Get alerts for passports, licenses, and insurance before they lapse.</p>
+    </div>
+    <div class="card-3d p-8">
+      <div class="h-14 w-14 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center mb-6">
+        <i data-lucide="qr-code" class="w-8 h-8"></i>
+      </div>
+      <h3 class="text-xl font-black mb-3">Emergency QR</h3>
+      <p class="text-slate-500 leading-relaxed">Carry your vital medical info in a QR code. Only share what you choose for emergency situations.</p>
+    </div>
+    <div class="card-3d p-8">
+      <div class="h-14 w-14 rounded-2xl bg-indigo-50 text-indigo-600 flex items-center justify-center mb-6">
+        <i data-lucide="share-2" class="w-8 h-8"></i>
+      </div>
+      <h3 class="text-xl font-black mb-3">Secure Sharing</h3>
+      <p class="text-slate-500 leading-relaxed">Need to share a document? Create expiring links with optional owner notes and download control.</p>
+    </div>
+    <div class="card-3d p-8">
+      <div class="h-14 w-14 rounded-2xl bg-red-50 text-red-600 flex items-center justify-center mb-6">
+        <i data-lucide="life-buoy" class="w-8 h-8"></i>
+      </div>
+      <h3 class="text-xl font-black mb-3">Support Center</h3>
+      <p class="text-slate-500 leading-relaxed">Direct line to our team. Raise tickets and get help with your document management workflows.</p>
+    </div>
+    <div class="card-3d p-8">
+      <div class="h-14 w-14 rounded-2xl bg-slate-100 text-slate-800 flex items-center justify-center mb-6">
+        <i data-lucide="layout" class="w-8 h-8"></i>
+      </div>
+      <h3 class="text-xl font-black mb-3">Role Portals</h3>
+      <p class="text-slate-500 leading-relaxed">Clean separation of concerns. Dedicated portals for users and operations administrators.</p>
+    </div>
+  </div>
+</section>
+
+<!-- Testimonials Section -->
+<section id="testimonials" class="py-20 border-t border-slate-100">
+  <div class="text-center max-w-3xl mx-auto mb-14">
+    <span class="badge bg-emerald-50 text-emerald-700 mb-4">Testimonials</span>
+    <h2 class="text-4xl font-black mb-4">Built around real citizen document pain points.</h2>
+    <p class="text-slate-500 text-lg">Replace these sample testimonials with verified customer quotes before public marketing.</p>
+  </div>
+  <div class="grid md:grid-cols-3 gap-8">
+    <article class="card-3d p-8"><p class="text-slate-500 leading-relaxed mb-6">“Renewal alerts and clean document categories make the vault useful from day one.”</p><p class="font-black">Aarav M.</p><p class="text-sm text-slate-400">Early user</p></article>
+    <article class="card-3d p-8"><p class="text-slate-500 leading-relaxed mb-6">“The emergency QR flow is simple enough for families to understand quickly.”</p><p class="font-black">Neha S.</p><p class="text-sm text-slate-400">Pilot user</p></article>
+    <article class="card-3d p-8"><p class="text-slate-500 leading-relaxed mb-6">“Role-separated admin pages make support and document operations easier to manage.”</p><p class="font-black">Service Desk</p><p class="text-sm text-slate-400">Demo operator</p></article>
+  </div>
+</section>
+
+<!-- Process Section -->
+<section class="py-20 border-t border-slate-100">
+  <div class="text-center max-w-3xl mx-auto mb-14">
+    <span class="badge bg-blue-50 text-blue-700 mb-4">Simple workflow</span>
+    <h2 class="text-4xl font-black mb-4">From scattered files to a clean digital vault.</h2>
+    <p class="text-slate-500 text-lg">DocSeva keeps the website understandable for beginners while preserving the controls needed for real operations.</p>
+  </div>
+  <div class="grid md:grid-cols-3 gap-8">
+    <div class="glass-3d p-8">
+      <div class="h-12 w-12 rounded-2xl bg-blue-600 text-white flex items-center justify-center font-black mb-6">1</div>
+      <h3 class="text-xl font-black mb-3">Upload and classify</h3>
+      <p class="text-slate-500 leading-relaxed">Add PDFs, images, or office files with category, source, and expiry information.</p>
+    </div>
+    <div class="glass-3d p-8">
+      <div class="h-12 w-12 rounded-2xl bg-indigo-600 text-white flex items-center justify-center font-black mb-6">2</div>
+      <h3 class="text-xl font-black mb-3">Track and renew</h3>
+      <p class="text-slate-500 leading-relaxed">Spot expired or expiring records and open a renewal checklist before the deadline.</p>
+    </div>
+    <div class="glass-3d p-8">
+      <div class="h-12 w-12 rounded-2xl bg-emerald-600 text-white flex items-center justify-center font-black mb-6">3</div>
+      <h3 class="text-xl font-black mb-3">Share only when needed</h3>
+      <p class="text-slate-500 leading-relaxed">Use controlled public links or emergency QR sharing without making the full account public.</p>
+    </div>
+  </div>
+</section>
+
+<!-- Call to Action -->
+<section class="py-20">
+  <div class="glass-3d p-12 relative overflow-hidden text-center lg:text-left">
+    <div class="absolute -right-20 -top-20 w-64 h-64 bg-blue-400/20 rounded-full blur-3xl"></div>
+    <div class="absolute -left-20 -bottom-20 w-64 h-64 bg-indigo-400/20 rounded-full blur-3xl"></div>
+    
+    <div class="relative grid lg:grid-cols-2 gap-8 items-center">
+      <div>
+        <h2 class="text-4xl font-black mb-4 leading-tight">Ready to secure your digital life?</h2>
+        <p class="text-slate-600 text-lg mb-0">Join thousands of citizens managing their records safely. Create your free account in less than a minute.</p>
+      </div>
+      <div class="lg:justify-self-end flex flex-wrap gap-4 justify-center">
+        <a href="{% url 'registration' %}" class="btn-modern btn-primary text-xl px-10 py-5">
+          Get Started Now
+        </a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Trust Footer -->
+<section class="py-20 border-t border-slate-100">
+  <div class="flex flex-wrap justify-center gap-12 opacity-50 grayscale hover:grayscale-0 transition-all duration-500">
+    <div class="flex items-center gap-2 font-bold text-slate-400"><i data-lucide="shield" class="w-5 h-5"></i> End-to-End Privacy</div>
+    <div class="flex items-center gap-2 font-bold text-slate-400"><i data-lucide="database" class="w-5 h-5"></i> Secure Storage</div>
+    <div class="flex items-center gap-2 font-bold text-slate-400"><i data-lucide="heart" class="w-5 h-5"></i> Citizen Focused</div>
+    <div class="flex items-center gap-2 font-bold text-slate-400"><i data-lucide="zap" class="w-5 h-5"></i> Quick Setup</div>
+  </div>
+</section>
+{% endblock %}

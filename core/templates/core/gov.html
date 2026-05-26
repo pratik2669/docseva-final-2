@@ -1,0 +1,231 @@
+{% extends 'core/base.html' %}
+{% block title %}Gov Hub | DocSeva{% endblock %}
+{% block content %}
+<div class="flex flex-wrap items-center justify-between gap-6 mb-10 animate-slide-up">
+  <div>
+    <div class="flex items-center gap-2 text-indigo-600 font-black text-xs uppercase tracking-[0.2em] mb-2">
+      <i data-lucide="landmark" class="w-4 h-4"></i> Government Services
+    </div>
+    <h1 class="text-4xl font-black text-slate-900 tracking-tight">Gov Hub</h1>
+    <p class="text-slate-500 mt-1">Connect with national health services and manage appointments.</p>
+  </div>
+  <div class="px-5 py-3 rounded-2xl bg-amber-50 border border-amber-200 text-amber-800 text-xs font-bold flex items-center gap-2 max-w-sm">
+    <i data-lucide="alert-circle" class="w-5 h-5 shrink-0"></i>
+    <span>ABHA and Ayushman flows are currently in <strong>Demo Mode</strong>. Official API integration required for production.</span>
+  </div>
+</div>
+
+<div class="grid lg:grid-cols-2 gap-8 animate-slide-up animate-delay-1">
+  <!-- ABHA Integration Card -->
+  <section class="card-3d p-8 relative overflow-hidden">
+    <div class="absolute -top-6 -right-6 h-24 w-24 bg-blue-50 rounded-full flex items-center justify-center text-blue-100">
+      <i data-lucide="activity" class="w-12 h-12"></i>
+    </div>
+    
+    <div class="flex items-center gap-4 mb-8 relative">
+      <div class="h-12 w-12 rounded-2xl bg-blue-600 flex items-center justify-center text-white shadow-lg">
+        <i data-lucide="fingerprint" class="w-6 h-6"></i>
+      </div>
+      <div>
+        <h2 class="text-2xl font-black text-slate-900">ABHA Link</h2>
+        <p class="text-slate-500 text-sm">Ayushman Bharat Health Account</p>
+      </div>
+    </div>
+
+    <form method="post" class="space-y-6 mb-8 relative">
+      {% csrf_token %}
+      <div class="space-y-4">
+        {% for field in abha_form %}
+          <div>
+            <label class="block text-xs font-black uppercase tracking-widest text-slate-400 mb-2 pl-1" for="{{ field.id_for_label }}">
+              {{ field.label }}
+            </label>
+            {{ field }}
+            {% for error in field.errors %}
+              <p class="text-red-600 text-xs font-bold mt-1">{{ error }}</p>
+            {% endfor %}
+          </div>
+        {% endfor %}
+      </div>
+      <button class="btn-modern btn-primary w-full py-4 shadow-xl shadow-blue-100">
+        Update ABHA Identification <i data-lucide="save" class="w-5 h-5"></i>
+      </button>
+    </form>
+
+    <div class="pt-8 border-t border-slate-50 relative">
+      <h3 class="text-sm font-black text-slate-900 uppercase tracking-widest mb-4">Demo Operations</h3>
+      <div class="grid grid-cols-2 gap-3">
+        <button id="abha-sync" class="btn-modern btn-outline border-emerald-100 text-emerald-700 hover:bg-emerald-50 text-sm py-3">
+          <i data-lucide="refresh-cw" class="w-4 h-4"></i> Mock Sync
+        </button>
+        <button id="ayushman-check" class="btn-modern btn-outline border-slate-200 text-slate-700 hover:bg-slate-50 text-sm py-3">
+          <i data-lucide="shield-check" class="w-4 h-4"></i> Mock Eligibility
+        </button>
+      </div>
+      <div id="gov-result-container" class="hidden mt-6 animate-slide-up">
+        <div class="flex items-center justify-between mb-2">
+          <p class="text-[10px] font-black uppercase tracking-widest text-slate-400">Response Buffer</p>
+          <button onclick="document.getElementById('gov-result-container').classList.add('hidden')" class="text-slate-400 hover:text-slate-600">
+            <i data-lucide="x" class="w-3 h-3"></i>
+          </button>
+        </div>
+        <pre id="gov-result" class="bg-slate-900 text-emerald-400 rounded-xl p-4 text-xs font-mono overflow-x-auto border-2 border-slate-800 shadow-inner"></pre>
+      </div>
+    </div>
+  </section>
+
+  <!-- Appointment Booking Card -->
+  <section class="card-3d p-8 relative overflow-hidden">
+    <div class="absolute -top-6 -right-6 h-24 w-24 bg-indigo-50 rounded-full flex items-center justify-center text-indigo-100">
+      <i data-lucide="calendar" class="w-12 h-12"></i>
+    </div>
+
+    <div class="flex items-center gap-4 mb-8 relative">
+      <div class="h-12 w-12 rounded-2xl bg-indigo-600 flex items-center justify-center text-white shadow-lg">
+        <i data-lucide="stethoscope" class="w-6 h-6"></i>
+      </div>
+      <div>
+        <h2 class="text-2xl font-black text-slate-900">Book Appointment</h2>
+        <p class="text-slate-500 text-sm">Schedule with registered healthcare providers</p>
+      </div>
+    </div>
+
+    <form method="post" class="space-y-6 relative">
+      {% csrf_token %}
+      <div class="space-y-4">
+        {% for field in appointment_form %}
+          <div>
+            <label class="block text-xs font-black uppercase tracking-widest text-slate-400 mb-2 pl-1" for="{{ field.id_for_label }}">
+              {{ field.label }}
+            </label>
+            {{ field }}
+            {% for error in field.errors %}
+              <p class="text-red-600 text-xs font-bold mt-1">{{ error }}</p>
+            {% endfor %}
+          </div>
+        {% endfor %}
+      </div>
+      <button class="btn-modern btn-secondary w-full py-4 shadow-xl shadow-indigo-100">
+        Request Appointment <i data-lucide="calendar-plus" class="w-5 h-5"></i>
+      </button>
+    </form>
+  </section>
+</div>
+
+<!-- Lists Section -->
+<div class="grid lg:grid-cols-2 gap-8 mt-12 animate-slide-up animate-delay-2">
+  <!-- Appointments List -->
+  <section class="card-3d p-8">
+    <div class="flex items-center justify-between mb-8">
+      <h2 class="text-2xl font-black text-slate-900 tracking-tight flex items-center gap-3">
+        <i data-lucide="clock" class="w-6 h-6 text-indigo-500"></i> Upcoming Appointments
+      </h2>
+    </div>
+    <div class="space-y-4">
+      {% for appt in appointments %}
+        <div class="group flex items-center justify-between p-4 rounded-2xl bg-slate-50 border border-slate-100 hover:border-indigo-200 transition-all hover:bg-white hover:shadow-lg">
+          <div class="flex items-center gap-4">
+            <div class="h-10 w-10 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center group-hover:scale-110 transition-transform">
+              <i data-lucide="user" class="w-5 h-5"></i>
+            </div>
+            <div>
+              <p class="font-black text-slate-900">{{ appt.doctor_name }}</p>
+              <p class="text-xs text-slate-500 flex items-center gap-1">
+                <i data-lucide="calendar" class="w-3 h-3"></i> {{ appt.datetime|date:'M d, Y • H:i' }}
+              </p>
+            </div>
+          </div>
+          <div class="text-right">
+            <span class="badge bg-indigo-50 text-indigo-700 mb-1">{{ appt.get_mode_display }}</span>
+            <p class="text-[10px] font-black uppercase tracking-widest text-slate-400">{{ appt.status }}</p>
+          </div>
+        </div>
+      {% empty %}
+        <div class="py-12 text-center text-slate-400">
+          <i data-lucide="calendar-x" class="w-12 h-12 mx-auto mb-3 opacity-20"></i>
+          <p class="font-bold">No active appointments</p>
+        </div>
+      {% endfor %}
+    </div>
+  </section>
+
+  <!-- ABHA Records List -->
+  <section class="card-3d p-8">
+    <div class="flex items-center justify-between mb-8">
+      <h2 class="text-2xl font-black text-slate-900 tracking-tight flex items-center gap-3">
+        <i data-lucide="database" class="w-6 h-6 text-emerald-500"></i> Mock Health Records
+      </h2>
+    </div>
+    <div class="space-y-4">
+      {% for record in abha_records %}
+        <div class="flex items-start gap-4 p-4 rounded-2xl bg-slate-50 border border-slate-100 hover:border-emerald-200 transition-colors">
+          <div class="h-10 w-10 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center shrink-0">
+            <i data-lucide="file-digit" class="w-5 h-5"></i>
+          </div>
+          <div class="min-w-0">
+            <div class="flex items-center justify-between gap-2 mb-1">
+              <p class="font-black text-slate-900 truncate uppercase text-xs tracking-wider">{{ record.get_record_type_display }}</p>
+              <span class="text-[10px] text-slate-400 font-bold shrink-0">{{ record.synced_at|date:'M d, H:i' }}</span>
+            </div>
+            <p class="text-sm text-slate-600 font-mono bg-white/50 p-2 rounded-lg border border-slate-100 truncate shadow-inner">
+              {{ record.data }}
+            </p>
+          </div>
+        </div>
+      {% empty %}
+        <div class="py-12 text-center text-slate-400">
+          <i data-lucide="database-zap" class="w-12 h-12 mx-auto mb-3 opacity-20"></i>
+          <p class="font-bold">No demo records synced yet</p>
+        </div>
+      {% endfor %}
+    </div>
+  </section>
+</div>
+
+<style>
+  /* Ensuring Django form inputs get our classes */
+  input[type="text"], input[type="datetime-local"], select, textarea {
+    width: 100%;
+    padding-left: 1rem;
+    padding-right: 1rem;
+    padding-top: 0.75rem;
+    padding-bottom: 0.75rem;
+    border: 2px solid #f1f5f9;
+    border-radius: 0.75rem;
+    outline: none;
+    transition: all 0.2s;
+    background: #f8fafc;
+  }
+  input:focus, select:focus {
+    border-color: #4f46e5;
+    background: #fff;
+    box-shadow: 0 0 0 4px rgba(79, 70, 229, 0.1);
+  }
+</style>
+
+<script>
+  async function postJson(url) {
+    const container = document.getElementById('gov-result-container');
+    const resultBox = document.getElementById('gov-result');
+    container.classList.remove('hidden');
+    resultBox.textContent = 'Processing request...';
+    
+    try {
+      const response = await fetch(url, { 
+        method: 'POST', 
+        headers: { 'X-CSRFToken': getCookie('csrftoken') }
+      });
+      const data = await response.json();
+      resultBox.textContent = JSON.stringify(data, null, 2);
+    } catch (err) {
+      resultBox.textContent = 'Error: ' + err.message;
+    }
+  }
+  
+  const syncBtn = document.getElementById('abha-sync');
+  const checkBtn = document.getElementById('ayushman-check');
+  
+  if (syncBtn) syncBtn.addEventListener('click', () => postJson('{% url "abha_sync" %}'));
+  if (checkBtn) checkBtn.addEventListener('click', () => postJson('{% url "ayushman_eligibility" %}'));
+</script>
+{% endblock %}

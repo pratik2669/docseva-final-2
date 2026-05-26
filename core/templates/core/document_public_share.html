@@ -1,0 +1,122 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{{ document.title }} | Shared via DocSeva</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
+    body { font-family: 'Plus Jakarta Sans', sans-serif; }
+    .share-card { background: #ffffff; border-radius: 2.5rem; box-shadow: 0 25px 50px -12px rgba(15, 23, 42, 0.1); border: 1px solid rgba(226, 232, 240, 0.8); }
+    .glass-effect { background: rgba(255, 255, 255, 0.7); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.5); }
+  </style>
+</head>
+<body class="min-h-screen bg-[radial-gradient(circle_at_top_left,#dbeafe,transparent_34%),linear-gradient(135deg,#f8fafc,#eff6ff,#f8fafc)] text-slate-900 selection:bg-blue-100 selection:text-blue-700">
+  <main class="max-w-4xl mx-auto px-4 py-12 md:py-24 animate-slide-up">
+    <div class="share-card p-8 md:p-12 relative overflow-hidden bg-white/80 backdrop-blur-xl">
+      <!-- Top Accent -->
+      <div class="absolute top-0 inset-x-0 h-2 bg-gradient-to-r from-blue-600 to-indigo-600"></div>
+      
+      <div class="flex flex-wrap items-start justify-between gap-6 mb-12">
+        <div class="flex items-center gap-4">
+          <div class="h-16 w-16 rounded-2xl bg-blue-600 flex items-center justify-center text-white shadow-xl shadow-blue-200">
+            <i data-lucide="file-check" class="w-8 h-8"></i>
+          </div>
+          <div>
+            <div class="flex items-center gap-2 mb-1">
+              <span class="text-[10px] font-black uppercase tracking-[0.3em] text-blue-600">Shared Securely</span>
+              <span class="h-1 w-1 rounded-full bg-slate-300"></span>
+              <span class="text-[10px] font-black uppercase tracking-[0.3em] text-slate-400">Verified Meta</span>
+            </div>
+            <h1 class="text-4xl font-black text-slate-900 tracking-tight">{{ document.title }}</h1>
+          </div>
+        </div>
+        <div class="text-right">
+          <p class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-1">Document Owner</p>
+          <p class="font-black text-slate-900 text-lg">{{ document.user.get_full_name|default:document.user.username }}</p>
+        </div>
+      </div>
+
+      {% if document.share_message %}
+        <div class="p-6 rounded-3xl bg-blue-50/50 border border-blue-100 mb-10 flex gap-4 items-start">
+          <i data-lucide="message-square" class="w-6 h-6 text-blue-600 shrink-0 mt-0.5"></i>
+          <div>
+            <p class="text-[10px] font-black uppercase tracking-widest text-blue-600 mb-1">Message from Owner</p>
+            <p class="text-slate-700 leading-relaxed italic">"{{ document.share_message }}"</p>
+          </div>
+        </div>
+      {% endif %}
+
+      <div class="grid md:grid-cols-3 gap-6 mb-12">
+        <div class="p-5 rounded-2xl bg-slate-50 border border-slate-100">
+          <p class="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-2">Category</p>
+          <p class="font-bold text-slate-900">{{ document.get_category_display }}</p>
+        </div>
+        <div class="p-5 rounded-2xl bg-slate-50 border border-slate-100">
+          <p class="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-2">Source</p>
+          <p class="font-bold text-slate-900">{{ document.source|default:'-' }}</p>
+        </div>
+        <div class="p-5 rounded-2xl bg-slate-50 border border-slate-100">
+          <p class="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-2">Size</p>
+          <p class="font-bold text-slate-900">{{ document.get_size_display }}</p>
+        </div>
+        <div class="p-5 rounded-2xl bg-slate-50 border border-slate-100">
+          <p class="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-2">Doc Date</p>
+          <p class="font-bold text-slate-900">{{ document.date|default:'-' }}</p>
+        </div>
+        <div class="p-5 rounded-2xl bg-slate-50 border border-slate-100">
+          <p class="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-2">Expiry</p>
+          <p class="font-bold text-slate-900">{{ document.expiry_date|default:'-' }}</p>
+        </div>
+        <div class="p-5 rounded-2xl bg-slate-50 border border-slate-100">
+          <p class="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-2">Format</p>
+          <p class="font-bold text-slate-900 uppercase">{{ document.file_format }}</p>
+        </div>
+      </div>
+
+      <div class="flex flex-col items-center gap-6 py-8 border-t border-slate-100">
+        {% if document.share_download_enabled %}
+          <div class="text-center space-y-4">
+            <p class="text-sm font-bold text-slate-500">The owner has authorized document download.</p>
+            <a href="{% url 'public_document_download' document.share_token %}" class="btn-modern bg-emerald-600 text-white hover:bg-emerald-700 px-10 py-5 text-xl shadow-xl shadow-emerald-100">
+              <i data-lucide="download" class="w-6 h-6 mr-2"></i> Download Document
+            </a>
+          </div>
+        {% else %}
+          <div class="p-6 rounded-[2rem] bg-amber-50 border border-amber-100 flex items-center gap-4 text-amber-900 max-w-lg">
+            <i data-lucide="shield-off" class="w-10 h-10 shrink-0 text-amber-500"></i>
+            <div>
+              <p class="font-black">Download Disabled</p>
+              <p class="text-xs leading-relaxed opacity-80">This link is for metadata verification only. The owner has disabled file downloading for this share.</p>
+            </div>
+          </div>
+        {% endif %}
+      </div>
+
+      <div class="mt-12 pt-8 border-t border-slate-100 flex flex-wrap justify-between items-center gap-4">
+        <div class="flex items-center gap-2">
+          <div class="h-8 w-8 rounded-lg bg-blue-600 flex items-center justify-center text-white">
+            <i data-lucide="shield-check" class="w-5 h-5"></i>
+          </div>
+          <span class="font-black text-slate-900">DocSeva</span>
+        </div>
+        <div class="flex items-center gap-4 text-[10px] font-black uppercase tracking-widest text-slate-400">
+          <p>Views: {{ document.share_views }}</p>
+          {% if document.share_expires_at %}
+            <span class="h-1 w-1 rounded-full bg-slate-300"></span>
+            <p>Expires {{ document.share_expires_at|date:'M d, H:i' }}</p>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+    
+    <div class="mt-8 text-center text-xs text-slate-400 px-8">
+      <p>This is a secure document sharing link generated by DocSeva. DocSeva does not store your viewing data. Document control remains with the original owner.</p>
+    </div>
+  </main>
+  
+  <script>lucide.createIcons();</script>
+</body>
+</html>

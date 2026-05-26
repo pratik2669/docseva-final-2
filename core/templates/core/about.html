@@ -1,0 +1,44 @@
+{% extends 'core/base.html' %}
+{% block title %}About DocSeva | Secure Citizen Document Management{% endblock %}
+{% block content %}
+<section class="py-16 lg:py-24 animate-slide-up">
+  <div class="max-w-4xl">
+    <span class="badge bg-blue-50 text-blue-700 mb-6">About DocSeva</span>
+    <h1 class="text-5xl md:text-6xl font-black tracking-tight leading-tight mb-6">A cleaner way to manage important citizen documents.</h1>
+    <p class="text-xl text-slate-500 leading-relaxed">DocSeva is built for people who want their documents organized, searchable, and ready when renewals, appointments, or emergency situations happen.</p>
+  </div>
+</section>
+
+<section class="grid lg:grid-cols-3 gap-8 mb-16 animate-slide-up animate-delay-1">
+  <div class="card-3d p-8">
+    <div class="h-14 w-14 rounded-2xl bg-blue-50 text-blue-600 flex items-center justify-center mb-6"><i data-lucide="shield-check" class="w-8 h-8"></i></div>
+    <h2 class="text-xl font-black mb-3">Privacy-first design</h2>
+    <p class="text-slate-500 leading-relaxed">Documents stay private by default. Public sharing is explicit, token-based, and can be disabled from the document detail page.</p>
+  </div>
+  <div class="card-3d p-8">
+    <div class="h-14 w-14 rounded-2xl bg-amber-50 text-amber-600 flex items-center justify-center mb-6"><i data-lucide="calendar-clock" class="w-8 h-8"></i></div>
+    <h2 class="text-xl font-black mb-3">Renewal awareness</h2>
+    <p class="text-slate-500 leading-relaxed">Expiry dates, renewal notes, and renewal checklists help prevent last-minute document problems.</p>
+  </div>
+  <div class="card-3d p-8">
+    <div class="h-14 w-14 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center mb-6"><i data-lucide="users" class="w-8 h-8"></i></div>
+    <h2 class="text-xl font-black mb-3">Role-separated portal</h2>
+    <p class="text-slate-500 leading-relaxed">Normal users, admins, and super admins have separate workflows so operations stay understandable and controlled.</p>
+  </div>
+</section>
+
+<section class="glass-3d p-8 lg:p-12 mb-16 animate-slide-up animate-delay-2">
+  <div class="grid lg:grid-cols-2 gap-10 items-start">
+    <div>
+      <h2 class="text-3xl font-black mb-4">What this website includes</h2>
+      <p class="text-slate-500 leading-relaxed">The app is deploy-ready for a Django production environment. It includes static-file handling, environment-based settings, database migrations, Docker deployment support, Render blueprint files, security headers, and a test suite.</p>
+    </div>
+    <div class="grid sm:grid-cols-2 gap-4">
+      <div class="rounded-2xl bg-white/70 border border-white p-5"><p class="font-black">Document vault</p><p class="text-sm text-slate-500 mt-1">Upload, filter, download, delete.</p></div>
+      <div class="rounded-2xl bg-white/70 border border-white p-5"><p class="font-black">Emergency QR</p><p class="text-sm text-slate-500 mt-1">Controlled public medical info.</p></div>
+      <div class="rounded-2xl bg-white/70 border border-white p-5"><p class="font-black">Gov Hub demo</p><p class="text-sm text-slate-500 mt-1">ABHA and appointment mock flows.</p></div>
+      <div class="rounded-2xl bg-white/70 border border-white p-5"><p class="font-black">Admin portal</p><p class="text-sm text-slate-500 mt-1">Users, tickets, logs, documents.</p></div>
+    </div>
+  </div>
+</section>
+{% endblock %}

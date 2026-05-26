@@ -1,0 +1,123 @@
+{% extends 'core/admin/base_admin.html' %}
+{% block title %}Ticket #{{ ticket.id }} | DocSeva Admin{% endblock %}
+{% block content %}
+<div class="mb-10 animate-slide-up">
+  <nav class="flex items-center gap-2 text-xs font-black uppercase tracking-widest text-slate-400 mb-4">
+    <a href="{% url 'admin_tickets' %}" class="hover:text-blue-600 transition-colors">Support Queue</a>
+    <i data-lucide="chevron-right" class="w-3 h-3"></i>
+    <span class="text-slate-600">Ticket Resolution</span>
+  </nav>
+  
+  <div class="flex flex-wrap items-end justify-between gap-6">
+    <div class="flex items-center gap-6">
+      <div class="h-16 w-16 rounded-2xl bg-amber-500 flex items-center justify-center text-white shadow-xl shadow-amber-100">
+        <i data-lucide="ticket" class="w-8 h-8"></i>
+      </div>
+      <div>
+        <h1 class="text-4xl font-black text-slate-900 tracking-tight mb-2">Ticket #{{ ticket.id }}</h1>
+        <div class="flex flex-wrap items-center gap-3">
+          <span class="badge 
+            {% if ticket.status == 'OPEN' %}bg-amber-100 text-amber-700
+            {% elif ticket.status == 'RESOLVED' %}bg-emerald-100 text-emerald-700
+            {% else %}bg-slate-100 text-slate-600{% endif %}">
+            {{ ticket.get_status_display }}
+          </span>
+          <span class="text-sm font-bold text-slate-400">Created by</span>
+          <a href="{% url 'admin_user_detail' ticket.user.id %}" class="text-sm font-black text-blue-600 hover:underline">{{ ticket.user.username }}</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="grid lg:grid-cols-2 gap-8 animate-slide-up animate-delay-1">
+  <!-- Resolution Section -->
+  <section class="space-y-8">
+    <div class="card-3d p-8">
+      <h2 class="text-2xl font-black text-slate-900 mb-8 flex items-center gap-3">
+        <i data-lucide="edit-3" class="w-6 h-6 text-amber-600"></i> Ticket Action
+      </h2>
+      
+      <div class="p-6 rounded-2xl bg-slate-50 border-2 border-slate-100 mb-8">
+        <p class="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-4 flex items-center gap-2">
+          <i data-lucide="user" class="w-3 h-3"></i> Original Citizen Request
+        </p>
+        <p class="font-bold text-slate-900 mb-2">{{ ticket.subject }}</p>
+        <p class="text-slate-700 leading-relaxed italic">"{{ ticket.message }}"</p>
+      </div>
+
+      <form method="post" class="space-y-6">
+        {% csrf_token %}
+        <input type="hidden" name="action" value="update">
+        
+        <div>
+          <label class="block text-xs font-black uppercase tracking-widest text-slate-400 mb-2 pl-1">Update Ticket Status</label>
+          <div class="relative">
+            <select name="status" class="w-full pl-4 pr-10 py-3 border-2 border-slate-100 rounded-xl focus:border-amber-500 outline-none font-bold text-slate-700 appearance-none bg-white">
+              {% for value,label in statuses %}
+                <option value="{{ value }}" {% if ticket.status == value %}selected{% endif %}>{{ label }}</option>
+              {% endfor %}
+            </select>
+            <i data-lucide="chevron-down" class="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none"></i>
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-xs font-black uppercase tracking-widest text-slate-400 mb-2 pl-1">Internal / Public Resolution Note</label>
+          <textarea name="admin_response" rows="6" class="w-full px-4 py-3 border-2 border-slate-100 rounded-xl focus:border-amber-500 outline-none transition-all" placeholder="Enter resolution details or instructions for the user...">{{ ticket.admin_response }}</textarea>
+        </div>
+
+        <button type="submit" class="btn-modern btn-primary bg-slate-900 hover:bg-black w-full py-4 shadow-xl shadow-slate-200">
+          Save Resolution Update <i data-lucide="save" class="w-5 h-5 ml-2"></i>
+        </button>
+      </form>
+    </div>
+  </section>
+
+  <!-- Live Chat Section -->
+  <section class="card-3d flex flex-col h-[700px] overflow-hidden">
+    <div class="p-6 border-b border-slate-50 bg-slate-50/50 flex items-center justify-between">
+      <div class="flex items-center gap-3">
+        <div class="h-10 w-10 rounded-xl bg-blue-100 text-blue-600 flex items-center justify-center">
+          <i data-lucide="messages-square" class="w-6 h-6"></i>
+        </div>
+        <div>
+          <h2 class="font-black text-slate-900 leading-none mb-1">Direct Citizen Communication</h2>
+          <p class="text-[10px] font-black uppercase tracking-widest text-slate-400">Linked to this ticket</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="flex-1 overflow-y-auto p-6 space-y-4 bg-[radial-gradient(#e2e8f0_1px,transparent_1px)] [background-size:20px_20px]">
+      {% for msg in chats %}
+        <div class="flex {% if msg.sender_id == request.user.id %}justify-end{% else %}justify-start{% endif %} animate-slide-up">
+          <div class="max-w-[85%] rounded-2xl px-4 py-3 shadow-sm border
+            {% if msg.sender_id == request.user.id %}bg-blue-600 text-white border-blue-500 rounded-tr-none{% else %}bg-white text-slate-800 border-slate-100 rounded-tl-none{% endif %}">
+            <div class="flex items-center gap-2 mb-1">
+              <span class="text-[10px] font-black uppercase tracking-widest opacity-70">{{ msg.sender.username }}</span>
+            </div>
+            <p class="text-sm leading-relaxed">{{ msg.message }}</p>
+            <p class="text-[9px] mt-2 opacity-50 text-right">{{ msg.timestamp|date:'M d, H:i' }}</p>
+          </div>
+        </div>
+      {% empty %}
+        <div class="h-full flex flex-col items-center justify-center text-slate-400 opacity-30">
+          <i data-lucide="message-circle" class="w-16 h-16 mb-4"></i>
+          <p class="font-black uppercase tracking-widest">No chat history for this ticket</p>
+        </div>
+      {% endfor %}
+    </div>
+
+    <div class="p-4 bg-white border-t border-slate-100">
+      <form method="post" class="flex gap-2">
+        {% csrf_token %}
+        <input type="hidden" name="action" value="reply">
+        <textarea name="message" rows="1" class="flex-1 bg-slate-50 border-2 border-slate-100 rounded-xl px-4 py-3 text-sm focus:bg-white focus:border-blue-500 outline-none transition-all resize-none" placeholder="Type a direct reply to citizen..."></textarea>
+        <button type="submit" class="btn-modern btn-primary py-3 px-6 shadow-xl shadow-blue-100">
+          <i data-lucide="send" class="w-5 h-5"></i>
+        </button>
+      </form>
+    </div>
+  </section>
+</div>
+{% endblock %}

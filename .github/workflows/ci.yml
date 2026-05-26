@@ -1,0 +1,49 @@
+name: DocSeva CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_DB: docseva_test
+          POSTGRES_USER: docseva
+          POSTGRES_PASSWORD: docseva
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+      redis:
+        image: redis:7
+        ports: ["6379:6379"]
+    env:
+      SECRET_KEY: test-secret-key-not-for-production
+      DEBUG: "False"
+      ALLOWED_HOSTS: localhost,127.0.0.1,testserver
+      CSRF_TRUSTED_ORIGINS: http://localhost:8000
+      DATABASE_URL: postgres://docseva:docseva@localhost:5432/docseva_test
+      DATABASE_SSL_REQUIRE: "False"
+      REDIS_URL: redis://localhost:6379/0
+      SECURE_SSL_REDIRECT: "False"
+      CELERY_TASK_ALWAYS_EAGER: "True"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: "pip"
+      - run: python -m pip install --upgrade pip
+      - run: pip install -r requirements/dev.txt
+      - run: python manage.py collectstatic --noinput
+      - run: python manage.py check --deploy
+      - run: coverage run manage.py test
+      - run: coverage report --fail-under=60

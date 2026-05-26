@@ -1,0 +1,2 @@
+release: python manage.py migrate --noinput && python manage.py create_default_plans && python manage.py collectstatic --noinput
+web: gunicorn docseva.wsgi:application --bind 0.0.0.0:$PORT --workers ${GUNICORN_WORKERS:-3} --timeout ${GUNICORN_TIMEOUT:-60} --max-requests ${GUNICORN_MAX_REQUESTS:-1200} --max-requests-jitter ${GUNICORN_MAX_REQUESTS_JITTER:-200} --access-logfile - --error-logfile - --log-level info

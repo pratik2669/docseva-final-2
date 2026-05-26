@@ -1,0 +1,376 @@
+{% load static %}
+<!doctype html>
+<html lang="en" class="scroll-smooth" data-theme="light">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="description" content="DocSeva is a secure citizen document vault with renewal tracking, emergency QR sharing, support tickets, and government-service demo workflows.">
+  <meta name="theme-color" content="#2563eb">
+  <meta name="robots" content="index,follow">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="{% block og_title %}DocSeva | Secure Document Vault{% endblock %}">
+  <meta property="og:description" content="{% block og_description %}Store documents, track renewals, share emergency information, and manage support securely.{% endblock %}">
+  <meta property="og:image" content="{% static 'core/img/og-default.svg' %}">
+  <meta name="twitter:card" content="summary_large_image">
+  <link rel="icon" href="{% static 'core/img/favicon.svg' %}" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="{% static 'core/img/logo.svg' %}">
+  <link rel="manifest" href="{% url 'site_manifest' %}">
+  <title>{% block title %}DocSeva | Secure Document Vault{% endblock %}</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <link rel="stylesheet" href="{% static 'core/css/app.css' %}">
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    "name": "DocSeva",
+    "description": "Secure citizen document vault with renewal tracking, emergency QR sharing, and support workflows.",
+    "url": "{{ request.scheme }}://{{ request.get_host }}{% url 'landing' %}",
+    "potentialAction": {
+      "@type": "SearchAction",
+      "target": "{{ request.scheme }}://{{ request.get_host }}{% url 'search' %}?q={search_term_string}",
+      "query-input": "required name=search_term_string"
+    }
+  }
+  </script>
+  {% block structured_data %}{% endblock %}
+</head>
+<body class="min-h-screen text-slate-900 selection:bg-blue-100 selection:text-blue-700">
+  <a href="#main-content" class="skip-link">Skip to main content</a>
+  <div class="fixed inset-0 -z-10 overflow-hidden pointer-events-none page-glow">
+    <div class="absolute -top-[10%] -left-[10%] w-[40%] h-[40%] rounded-full bg-blue-200/30 blur-[120px]"></div>
+    <div class="absolute top-[20%] -right-[10%] w-[30%] h-[30%] rounded-full bg-indigo-200/20 blur-[100px]"></div>
+    <div class="absolute -bottom-[10%] left-[20%] w-[35%] h-[35%] rounded-full bg-emerald-100/30 blur-[110px]"></div>
+  </div>
+
+  <header class="sticky top-0 z-50 transition-all duration-300" id="main-header">
+    <div class="max-w-7xl mx-auto px-4 py-3">
+      <nav class="glass-3d px-6 py-2 flex items-center justify-between gap-4" aria-label="Primary navigation">
+        <a href="{% url 'landing' %}" class="flex items-center gap-2 group" aria-label="DocSeva home">
+          <img src="{% static 'core/img/logo.svg' %}" alt="" class="h-10 w-10 rounded-xl shadow-lg shadow-blue-200 group-hover:scale-110 transition-transform">
+          <span class="font-black text-2xl tracking-tight text-slate-900 brand-text">Doc<span class="text-blue-600">Seva</span></span>
+        </a>
+
+        <div class="hidden lg:flex items-center gap-1">
+          {% if user.is_authenticated %}
+            <a href="{% url 'dashboard' %}" class="nav-pill {% if request.resolver_match.url_name == 'dashboard' %}active{% endif %}">Dashboard</a>
+            <a href="{% url 'document' %}" class="nav-pill {% if request.resolver_match.url_name == 'document' %}active{% endif %}">Documents</a>
+            <a href="{% url 'gov' %}" class="nav-pill {% if request.resolver_match.url_name == 'gov' %}active{% endif %}">Gov Hub</a>
+            <a href="{% url 'support' %}" class="nav-pill {% if request.resolver_match.url_name == 'support' %}active{% endif %}">Support</a>
+            <a href="{% url 'security' %}" class="nav-pill {% if request.resolver_match.url_name == 'security' %}active{% endif %}">Security</a>
+            <div class="h-6 w-px bg-slate-200 mx-2"></div>
+            <button id="theme-toggle" type="button" class="p-2 rounded-xl hover:bg-slate-100 transition-colors" aria-label="Toggle dark mode"><i data-lucide="moon" class="w-5 h-5"></i></button>
+            <button id="notifications-button" type="button" aria-label="Open notifications" aria-expanded="false" class="relative p-2 rounded-xl hover:bg-slate-100 transition-colors group">
+              <i data-lucide="bell" class="w-5 h-5 text-slate-600 group-hover:text-blue-600"></i>
+              {% if unread_notifications %}<span class="absolute top-1.5 right-1.5 w-2 h-2 bg-red-500 rounded-full border-2 border-white"></span>{% endif %}
+            </button>
+            <div class="relative group">
+              <button type="button" class="flex items-center gap-2 p-1 pl-2 rounded-xl hover:bg-slate-100 transition-colors">
+                <span class="text-sm font-bold text-slate-700">{{ user.username }}</span>
+                <div class="h-8 w-8 rounded-lg bg-slate-200 flex items-center justify-center text-slate-600 font-bold overflow-hidden">
+                  {% if profile.image %}<img src="{{ profile.image.url }}" class="w-full h-full object-cover" alt="{{ user.username }}">{% else %}{{ user.username|slice:":1"|upper }}{% endif %}
+                </div>
+              </button>
+              <div class="absolute right-0 mt-2 w-48 glass-3d p-2 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 transform origin-top-right group-hover:translate-y-0 translate-y-2 z-[60]">
+                {% if is_portal_admin %}<a href="{% url 'admin_dashboard' %}" class="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-blue-50 text-blue-700 text-sm font-bold"><i data-lucide="layout-dashboard" class="w-4 h-4"></i> Admin Portal</a>{% endif %}
+                <a href="{% url 'profile' %}" class="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-slate-50 text-slate-700 text-sm font-semibold"><i data-lucide="user" class="w-4 h-4"></i> Profile</a>
+                <hr class="my-1 border-slate-100">
+                <form action="{% url 'logout' %}" method="post" class="m-0">{% csrf_token %}<button type="submit" class="w-full flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-red-50 text-red-600 text-sm font-semibold"><i data-lucide="log-out" class="w-4 h-4"></i> Logout</button></form>
+              </div>
+            </div>
+          {% else %}
+            <a href="{% url 'about' %}" class="nav-pill {% if request.resolver_match.url_name == 'about' %}active{% endif %}">About</a>
+            <a href="{% url 'pricing' %}" class="nav-pill {% if request.resolver_match.url_name == 'pricing' %}active{% endif %}">Pricing</a>
+            <a href="{% url 'faq' %}" class="nav-pill {% if request.resolver_match.url_name == 'faq' %}active{% endif %}">FAQ</a>
+            <a href="{% url 'resources' %}" class="nav-pill {% if request.resolver_match.url_name == 'resources' %}active{% endif %}">Resources</a>
+            <a href="{% url 'contact' %}" class="nav-pill {% if request.resolver_match.url_name == 'contact' %}active{% endif %}">Contact</a>
+            <button id="theme-toggle" type="button" class="p-2 rounded-xl hover:bg-slate-100 transition-colors" aria-label="Toggle dark mode"><i data-lucide="moon" class="w-5 h-5"></i></button>
+            <a href="{% url 'login' %}" class="nav-pill">Login</a>
+            <a href="{% url 'registration' %}" class="btn-modern btn-primary text-sm ml-2">Get Started</a>
+          {% endif %}
+        </div>
+
+        <button type="button" class="lg:hidden p-2 rounded-xl hover:bg-slate-100" id="mobile-menu-toggle" aria-label="Open menu" aria-expanded="false" aria-controls="mobile-menu">
+          <i data-lucide="menu" class="w-6 h-6"></i>
+        </button>
+      </nav>
+
+      {% if user.is_authenticated %}
+        <div id="notifications-panel" class="hidden absolute right-4 top-20 w-80 max-w-[calc(100vw-2rem)] glass-3d p-4 z-50 animate-slide-up">
+          <div class="flex items-center justify-between mb-4">
+            <h3 class="font-bold">Notifications</h3>
+            <button type="button" onclick="markAllRead()" class="text-xs text-blue-600 font-bold hover:underline">Mark all read</button>
+          </div>
+          <div id="notifications-list" class="space-y-3 max-h-96 overflow-y-auto pr-1">
+            <div class="skeleton h-16 rounded-xl"></div>
+            <div class="skeleton h-16 rounded-xl"></div>
+          </div>
+        </div>
+      {% endif %}
+
+      <div id="mobile-menu" class="hidden lg:hidden mt-4 glass-3d p-4 space-y-2 animate-slide-up">
+        {% if user.is_authenticated %}
+          <a href="{% url 'dashboard' %}" class="block px-4 py-3 rounded-xl font-bold hover:bg-blue-50">Dashboard</a>
+          <a href="{% url 'document' %}" class="block px-4 py-3 rounded-xl font-bold hover:bg-blue-50">Documents</a>
+          <a href="{% url 'gov' %}" class="block px-4 py-3 rounded-xl font-bold hover:bg-blue-50">Gov Hub</a>
+          <a href="{% url 'support' %}" class="block px-4 py-3 rounded-xl font-bold hover:bg-blue-50">Support</a>
+          <a href="{% url 'security' %}" class="block px-4 py-3 rounded-xl font-bold hover:bg-blue-50">Security</a>
+          <a href="{% url 'profile' %}" class="block px-4 py-3 rounded-xl font-bold hover:bg-blue-50">Profile</a>
+          {% if is_portal_admin %}<a href="{% url 'admin_dashboard' %}" class="block px-4 py-3 rounded-xl font-bold bg-slate-900 text-white">Admin Portal</a>{% endif %}
+          <button id="theme-toggle-mobile" type="button" class="w-full text-left px-4 py-3 rounded-xl font-bold hover:bg-blue-50">Toggle dark mode</button>
+          <hr class="my-2 border-slate-100">
+          <form action="{% url 'logout' %}" method="post" class="m-0">{% csrf_token %}<button type="submit" class="w-full text-left block px-4 py-3 rounded-xl font-bold text-red-600 hover:bg-red-50">Logout</button></form>
+        {% else %}
+          <a href="{% url 'about' %}" class="block px-4 py-3 rounded-xl font-bold hover:bg-blue-50">About</a>
+          <a href="{% url 'pricing' %}" class="block px-4 py-3 rounded-xl font-bold hover:bg-blue-50">Pricing</a>
+          <a href="{% url 'faq' %}" class="block px-4 py-3 rounded-xl font-bold hover:bg-blue-50">FAQ</a>
+          <a href="{% url 'resources' %}" class="block px-4 py-3 rounded-xl font-bold hover:bg-blue-50">Resources</a>
+          <a href="{% url 'contact' %}" class="block px-4 py-3 rounded-xl font-bold hover:bg-blue-50">Contact</a>
+          <button id="theme-toggle-mobile" type="button" class="w-full text-left px-4 py-3 rounded-xl font-bold hover:bg-blue-50">Toggle dark mode</button>
+          <a href="{% url 'login' %}" class="block px-4 py-3 rounded-xl font-bold hover:bg-blue-50">Login</a>
+          <a href="{% url 'registration' %}" class="block px-4 py-3 rounded-xl font-bold bg-blue-600 text-white text-center">Create Account</a>
+        {% endif %}
+      </div>
+    </div>
+  </header>
+
+  <main id="main-content" class="max-w-7xl mx-auto px-4 py-8">
+    {% if messages %}
+      <div class="fixed bottom-6 right-6 z-[100] space-y-3 max-w-md w-full px-4">
+        {% for message in messages %}
+          <div class="animate-slide-up glass-3d border-l-4 flex items-start gap-3 p-4 shadow-2xl {% if message.tags == 'error' %}border-red-500{% elif message.tags == 'success' %}border-emerald-500{% else %}border-blue-500{% endif %}">
+            <div class="shrink-0 p-1 rounded-lg {% if message.tags == 'error' %}bg-red-50 text-red-600{% elif message.tags == 'success' %}bg-emerald-50 text-emerald-600{% else %}bg-blue-50 text-blue-600{% endif %}">
+              {% if message.tags == 'error' %}<i data-lucide="alert-circle" class="w-5 h-5"></i>{% elif message.tags == 'success' %}<i data-lucide="check-circle" class="w-5 h-5"></i>{% else %}<i data-lucide="info" class="w-5 h-5"></i>{% endif %}
+            </div>
+            <div class="flex-1"><p class="text-sm font-bold text-slate-800">{{ message }}</p></div>
+            <button type="button" onclick="this.parentElement.remove()" class="text-slate-400 hover:text-slate-600 transition-colors" aria-label="Dismiss message"><i data-lucide="x" class="w-4 h-4"></i></button>
+          </div>
+        {% endfor %}
+      </div>
+    {% endif %}
+
+    {% if breadcrumb_items %}
+      <nav class="mb-6 text-sm" aria-label="Breadcrumb">
+        <ol class="flex flex-wrap items-center gap-2 text-slate-500">
+          {% for crumb in breadcrumb_items %}
+            <li class="flex items-center gap-2">
+              {% if not forloop.first %}<i data-lucide="chevron-right" class="w-4 h-4 text-slate-300"></i>{% endif %}
+              {% if crumb.url_name %}<a class="font-bold hover:text-blue-600" href="{% url crumb.url_name %}">{{ crumb.label }}</a>{% else %}<span class="font-bold text-slate-900">{{ crumb.label }}</span>{% endif %}
+            </li>
+          {% endfor %}
+        </ol>
+      </nav>
+    {% endif %}
+
+    {% block content %}{% endblock %}
+  </main>
+
+  <footer class="mt-20 border-t border-slate-200 bg-white/50 backdrop-blur-sm">
+    <div class="max-w-7xl mx-auto px-4 py-12">
+      <div class="grid lg:grid-cols-5 gap-8">
+        <div class="lg:col-span-2">
+          <a href="{% url 'landing' %}" class="flex items-center gap-2 mb-4">
+            <img src="{% static 'core/img/logo.svg' %}" alt="" class="h-8 w-8 rounded-lg">
+            <span class="font-black text-xl tracking-tight">DocSeva</span>
+          </a>
+          <p class="text-slate-500 max-w-sm mb-5">DocSeva keeps your vital documents private and organized. It supports renewals, secure sharing, emergency QR, and role-separated operations.</p>
+          <div class="flex gap-3 text-slate-500">
+            <a href="https://github.com/" rel="noopener noreferrer" target="_blank" aria-label="GitHub" class="social-link"><i data-lucide="github" class="w-5 h-5"></i></a>
+            <a href="https://www.linkedin.com/" rel="noopener noreferrer" target="_blank" aria-label="LinkedIn" class="social-link"><i data-lucide="linkedin" class="w-5 h-5"></i></a>
+            <a href="https://x.com/" rel="noopener noreferrer" target="_blank" aria-label="X" class="social-link"><i data-lucide="twitter" class="w-5 h-5"></i></a>
+          </div>
+        </div>
+        <div>
+          <h4 class="font-bold mb-4">Product</h4>
+          <ul class="space-y-2 text-slate-500 text-sm">
+            <li><a href="{% url 'pricing' %}" class="hover:text-blue-600">Pricing</a></li>
+            <li><a href="{% url 'faq' %}" class="hover:text-blue-600">FAQ</a></li>
+            <li><a href="{% url 'resources' %}" class="hover:text-blue-600">Resources</a></li>
+            <li><a href="{% url 'support' %}" class="hover:text-blue-600">Support Center</a></li>
+          </ul>
+        </div>
+        <div>
+          <h4 class="font-bold mb-4">Company</h4>
+          <ul class="space-y-2 text-slate-500 text-sm">
+            <li><a href="{% url 'about' %}" class="hover:text-blue-600">About</a></li>
+            <li><a href="{% url 'contact' %}" class="hover:text-blue-600">Contact</a></li>
+            <li><a href="{% url 'privacy' %}" class="hover:text-blue-600">Privacy Policy</a></li>
+            <li><a href="{% url 'terms' %}" class="hover:text-blue-600">Terms of Service</a></li>
+          </ul>
+        </div>
+        <div>
+          <h4 class="font-bold mb-4">Newsletter</h4>
+          <form action="{% url 'newsletter_subscribe' %}" method="post" class="space-y-3">
+            {% csrf_token %}
+            <input type="hidden" name="source" value="footer">
+            {{ newsletter_form.email }}
+            <label class="flex items-start gap-2 text-xs text-slate-500 leading-relaxed">
+              {{ newsletter_form.consent }}
+              <span>Send me launch updates and security notices.</span>
+            </label>
+            <button class="btn-modern btn-primary w-full text-sm" type="submit">Subscribe</button>
+          </form>
+        </div>
+      </div>
+      <div class="mt-12 pt-8 border-t border-slate-100 flex flex-wrap justify-between items-center gap-4 text-xs text-slate-400">
+        <p>© 2026 DocSeva Project. Government API flows are mock/demo until real integrations are configured.</p>
+        <div class="flex flex-wrap gap-4">
+          <a href="{% url 'privacy' %}" class="hover:text-slate-600">Privacy</a>
+          <a href="{% url 'terms' %}" class="hover:text-slate-600">Terms</a>
+          <a href="{% url 'sitemap_xml' %}" class="hover:text-slate-600">Sitemap</a>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <div id="cookie-consent" class="hidden fixed inset-x-4 bottom-4 z-[140] max-w-3xl mx-auto glass-3d p-5 shadow-2xl">
+    <div class="flex flex-col md:flex-row md:items-center gap-4 justify-between">
+      <div>
+        <p class="font-black text-slate-900">Cookie notice</p>
+        <p class="text-sm text-slate-500 mt-1">DocSeva uses essential cookies for login sessions, CSRF protection, and security. Optional analytics must be enabled separately by the deployer.</p>
+      </div>
+      <button id="cookie-accept" type="button" class="btn-modern btn-primary shrink-0">Accept</button>
+    </div>
+  </div>
+
+  <script>
+    const root = document.documentElement;
+    const savedTheme = localStorage.getItem('docseva-theme');
+    if (savedTheme === 'dark' || (!savedTheme && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+      root.dataset.theme = 'dark';
+    }
+
+    function refreshIcons() { if (window.lucide) lucide.createIcons(); }
+    function toggleTheme() {
+      root.dataset.theme = root.dataset.theme === 'dark' ? 'light' : 'dark';
+      localStorage.setItem('docseva-theme', root.dataset.theme);
+      refreshIcons();
+    }
+    document.getElementById('theme-toggle')?.addEventListener('click', toggleTheme);
+    document.getElementById('theme-toggle-mobile')?.addEventListener('click', toggleTheme);
+    refreshIcons();
+
+    function getCookie(name) {
+      let cookieValue = null;
+      if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+          const cookie = cookies[i].trim();
+          if (cookie.substring(0, name.length + 1) === (name + '=')) {
+            cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+            break;
+          }
+        }
+      }
+      return cookieValue;
+    }
+
+    function setExpanded(control, expanded) { if (control) control.setAttribute('aria-expanded', String(expanded)); }
+    function setEmptyState(container, message) {
+      if (!container) return;
+      container.replaceChildren();
+      const empty = document.createElement('div');
+      empty.className = 'text-center py-8 text-slate-400 text-sm';
+      empty.textContent = message;
+      container.appendChild(empty);
+    }
+    function renderNotification(item) {
+      const card = document.createElement('div');
+      card.className = 'p-3 rounded-xl bg-slate-50 border border-slate-100 hover:border-blue-200 transition-colors';
+      const title = document.createElement('p');
+      title.className = 'font-bold text-sm text-slate-800';
+      title.textContent = item.title || 'Notification';
+      const message = document.createElement('p');
+      message.className = 'text-xs text-slate-500 mt-1';
+      message.textContent = item.message || '';
+      card.append(title, message);
+      return card;
+    }
+
+    const header = document.getElementById('main-header');
+    window.addEventListener('scroll', () => { if (header) header.classList.toggle('py-2', window.scrollY > 20); }, { passive: true });
+    const menuToggle = document.getElementById('mobile-menu-toggle');
+    const mobileMenu = document.getElementById('mobile-menu');
+    if (menuToggle && mobileMenu) {
+      menuToggle.addEventListener('click', () => {
+        const isHidden = mobileMenu.classList.toggle('hidden');
+        setExpanded(menuToggle, !isHidden);
+      });
+    }
+
+    const notifyBtn = document.getElementById('notifications-button');
+    const notifyPanel = document.getElementById('notifications-panel');
+    const notifyList = document.getElementById('notifications-list');
+    if (notifyBtn && notifyPanel && notifyList) {
+      notifyBtn.addEventListener('click', async () => {
+        const isHidden = notifyPanel.classList.toggle('hidden');
+        setExpanded(notifyBtn, !isHidden);
+        if (isHidden) return;
+        try {
+          const response = await fetch('{% url "api_notifications" %}', { headers: { 'Accept': 'application/json' } });
+          if (!response.ok) throw new Error('Unable to load notifications.');
+          const data = await response.json();
+          if (!data.notifications || !data.notifications.length) { setEmptyState(notifyList, 'No new notifications'); return; }
+          notifyList.replaceChildren(...data.notifications.map(renderNotification));
+        } catch (error) { setEmptyState(notifyList, error.message || 'Unable to load notifications'); }
+      });
+    }
+
+    async function markAllRead() {
+      if (!notifyList || !notifyBtn) return;
+      const response = await fetch('{% url "api_notifications_read_all" %}', {
+        method: 'POST',
+        headers: { 'X-CSRFToken': getCookie('csrftoken'), 'Content-Type': 'application/json', 'Accept': 'application/json' }
+      });
+      if (response.ok) {
+        setEmptyState(notifyList, 'All notifications marked read');
+        const badge = notifyBtn.querySelector('span');
+        if (badge) badge.remove();
+      }
+    }
+
+    function copyText(value) {
+      if (!navigator.clipboard) { window.prompt('Copy this link:', value); return; }
+      navigator.clipboard.writeText(value).then(() => {
+        document.dispatchEvent(new CustomEvent('docseva:toast', { detail: { message: 'Copied to clipboard' } }));
+      }).catch(() => window.prompt('Copy this link:', value));
+    }
+
+    document.addEventListener('docseva:toast', (event) => {
+      const message = event.detail?.message || 'Done';
+      const toast = document.createElement('div');
+      toast.className = 'fixed bottom-6 left-1/2 -translate-x-1/2 z-[120] rounded-2xl bg-slate-900 px-5 py-3 text-sm font-bold text-white shadow-2xl animate-slide-up';
+      toast.textContent = message;
+      document.body.appendChild(toast);
+      setTimeout(() => toast.remove(), 2200);
+    });
+
+    const cookieBox = document.getElementById('cookie-consent');
+    if (cookieBox && localStorage.getItem('docseva-cookie-consent') !== 'accepted') cookieBox.classList.remove('hidden');
+    document.getElementById('cookie-accept')?.addEventListener('click', () => {
+      localStorage.setItem('docseva-cookie-consent', 'accepted');
+      cookieBox?.classList.add('hidden');
+    });
+
+    document.querySelectorAll('[data-password-toggle]').forEach((button) => {
+      button.addEventListener('click', () => {
+        const input = document.getElementById(button.dataset.passwordToggle);
+        if (!input) return;
+        input.type = input.type === 'password' ? 'text' : 'password';
+        button.textContent = input.type === 'password' ? 'Show' : 'Hide';
+      });
+    });
+
+    document.addEventListener('keydown', (event) => {
+      if (event.key !== 'Escape') return;
+      if (mobileMenu && !mobileMenu.classList.contains('hidden')) { mobileMenu.classList.add('hidden'); setExpanded(menuToggle, false); }
+      if (notifyPanel && !notifyPanel.classList.contains('hidden')) { notifyPanel.classList.add('hidden'); setExpanded(notifyBtn, false); }
+    });
+    document.addEventListener('click', (event) => {
+      if (notifyBtn && notifyPanel && !notifyPanel.classList.contains('hidden') && !notifyBtn.contains(event.target) && !notifyPanel.contains(event.target)) {
+        notifyPanel.classList.add('hidden'); setExpanded(notifyBtn, false);
+      }
+    });
+  </script>
+</body>
+</html>

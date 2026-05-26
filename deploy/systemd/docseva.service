@@ -1,0 +1,17 @@
+[Unit]
+Description=DocSeva Gunicorn Web Service
+After=network.target postgresql.service redis.service
+
+[Service]
+User=docseva
+Group=www-data
+WorkingDirectory=/srv/docseva/current
+EnvironmentFile=/srv/docseva/.env
+ExecStart=/srv/docseva/venv/bin/gunicorn docseva.wsgi:application --bind 127.0.0.1:8000 --workers 3 --timeout 60 --access-logfile - --error-logfile -
+Restart=always
+RestartSec=5
+PrivateTmp=true
+NoNewPrivileges=true
+
+[Install]
+WantedBy=multi-user.target

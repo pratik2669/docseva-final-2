@@ -1,0 +1,127 @@
+{% extends 'core/admin/base_admin.html' %}
+{% block title %}Security Logs | DocSeva Admin{% endblock %}
+{% block content %}
+<div class="mb-10 animate-slide-up">
+  <div class="flex items-center gap-2 text-slate-600 font-black text-xs uppercase tracking-[0.2em] mb-2">
+    <i data-lucide="shield-alert" class="w-4 h-4"></i> Compliance & Audit
+  </div>
+  <h1 class="text-4xl font-black text-slate-900 tracking-tight">Global Security Logs</h1>
+  <p class="text-slate-500 mt-1">Full audit trail of all system, document, and administrative events.</p>
+</div>
+
+<section class="glass-3d p-6 mb-8 animate-slide-up animate-delay-1">
+  <form method="get" class="flex flex-wrap gap-4 items-end">
+    <div class="flex-1 min-w-[300px]">
+      <label class="block text-xs font-black uppercase tracking-widest text-slate-400 mb-2 pl-1">Search Events</label>
+      <div class="relative group">
+        <i data-lucide="search" class="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 group-focus-within:text-slate-900 transition-colors"></i>
+        <input name="q" class="w-full pl-11 pr-4 py-2.5 border-2 border-slate-100 rounded-xl focus:border-slate-900 focus:bg-white transition-all outline-none text-sm" placeholder="Title, description, user, or IP..." value="{{ query }}">
+      </div>
+    </div>
+    
+    <div class="w-full md:w-64">
+      <label class="block text-xs font-black uppercase tracking-widest text-slate-400 mb-2 pl-1">Status Type</label>
+      <div class="relative">
+        <select name="status" class="w-full pl-4 pr-10 py-2.5 border-2 border-slate-100 rounded-xl focus:border-slate-900 outline-none text-sm cursor-pointer appearance-none bg-white">
+          <option value="">All Event Statuses</option>
+          {% for value,label in statuses %}
+            <option value="{{ value }}" {% if status_filter == value %}selected{% endif %}>{{ label }}</option>
+          {% endfor %}
+        </select>
+        <i data-lucide="chevron-down" class="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none"></i>
+      </div>
+    </div>
+
+    <div class="flex gap-2">
+      <button class="btn-modern btn-primary bg-slate-900 hover:bg-black py-3 px-8 text-sm">Apply Audit Filter</button>
+      <a href="{% url 'admin_security' %}" class="btn-modern btn-outline py-3 px-6 text-sm border-slate-200">Clear</a>
+    </div>
+  </form>
+</section>
+
+<section class="card-3d overflow-hidden animate-slide-up animate-delay-2">
+  <div class="overflow-x-auto">
+    <table class="modern-table mb-0">
+      <thead>
+        <tr>
+          <th class="pl-8">Activity / Event</th>
+          <th>Trigger User</th>
+          <th>Status</th>
+          <th>Network IP</th>
+          <th>System Timestamp</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for log in logs_page %}
+          <tr class="group border-b border-slate-50 last:border-none hover:bg-slate-50/50">
+            <td class="pl-8 py-5">
+              <div class="flex items-start gap-4">
+                <div class="h-10 w-10 rounded-xl bg-slate-100 flex items-center justify-center shrink-0 mt-1">
+                  <i data-lucide="{% if log.status == 'failed' %}shield-x{% else %}shield-check{% endif %}" class="w-5 h-5 text-slate-400"></i>
+                </div>
+                <div class="min-w-0">
+                  <p class="font-black text-slate-900 text-sm truncate max-w-[300px]">{{ log.title }}</p>
+                  <p class="text-xs text-slate-400 line-clamp-1 italic">{{ log.description }}</p>
+                </div>
+              </div>
+            </td>
+            <td>
+              <div class="flex items-center gap-2">
+                <div class="h-6 w-6 rounded-lg bg-slate-100 flex items-center justify-center text-[10px] font-black text-slate-400">
+                  {{ log.user.username|slice:":1"|upper|default:'S' }}
+                </div>
+                <span class="text-sm font-bold text-slate-600">{{ log.user.username|default:'System Process' }}</span>
+              </div>
+            </td>
+            <td>
+              <span class="badge 
+                {% if log.status == 'success' %}bg-emerald-50 text-emerald-700
+                {% elif log.status == 'warning' %}bg-amber-50 text-amber-700
+                {% elif log.status == 'failed' %}bg-red-50 text-red-700
+                {% else %}bg-slate-50 text-slate-600{% endif %}">
+                {{ log.status|upper }}
+              </span>
+            </td>
+            <td>
+              <p class="text-xs font-mono text-slate-400">{{ log.ip_address|default:'0.0.0.0' }}</p>
+            </td>
+            <td>
+              <p class="text-xs font-bold text-slate-500">{{ log.timestamp|date:'M d, Y' }}</p>
+              <p class="text-[10px] text-slate-300 font-black uppercase tracking-widest">{{ log.timestamp|date:'H:i:s' }}</p>
+            </td>
+          </tr>
+        {% empty %}
+          <tr>
+            <td colspan="5" class="py-20 text-center">
+              <div class="flex flex-col items-center gap-4">
+                <i data-lucide="shield-off" class="w-12 h-12 text-slate-200"></i>
+                <h3 class="font-black text-xl text-slate-900">No logs found</h3>
+              </div>
+            </td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  {% if logs_page.paginator.num_pages > 1 %}
+    <div class="p-6 border-t border-slate-50 bg-slate-50/30 flex flex-wrap items-center justify-between gap-4">
+      <p class="text-xs font-black uppercase tracking-widest text-slate-400">
+        Audit Registry: {{ logs_page.start_index }} - {{ logs_page.end_index }} of {{ logs_page.paginator.count }} events
+      </p>
+      <div class="flex gap-2">
+        {% if logs_page.has_previous %}
+          <a href="?page={{ logs_page.previous_page_number }}&q={{ query }}&status={{ status_filter }}" class="btn-modern btn-outline bg-white py-2 px-4 text-xs border-slate-200">
+            <i data-lucide="chevron-left" class="w-4 h-4 mr-1"></i> Previous
+          </a>
+        {% endif %}
+        {% if logs_page.has_next %}
+          <a href="?page={{ logs_page.next_page_number }}&q={{ query }}&status={{ status_filter }}" class="btn-modern btn-outline bg-white py-2 px-4 text-xs border-slate-200">
+            Next <i data-lucide="chevron-right" class="w-4 h-4 ml-1"></i>
+          </a>
+        {% endif %}
+      </div>
+    </div>
+  {% endif %}
+</section>
+{% endblock %}

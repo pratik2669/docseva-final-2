@@ -1,0 +1,121 @@
+{% extends 'core/admin/base_admin.html' %}
+{% block title %}Appointments | DocSeva Admin{% endblock %}
+{% block content %}
+<div class="mb-10 animate-slide-up">
+  <div class="flex items-center gap-2 text-emerald-600 font-black text-xs uppercase tracking-[0.2em] mb-2">
+    <i data-lucide="calendar-check" class="w-4 h-4"></i> Service Scheduling
+  </div>
+  <h1 class="text-4xl font-black text-slate-900 tracking-tight">Global Appointments</h1>
+  <p class="text-slate-500 mt-1">Review and audit all health service requests across the platform.</p>
+</div>
+
+<section class="glass-3d p-6 mb-8 animate-slide-up animate-delay-1">
+  <form method="get" class="flex gap-4 items-end">
+    <div class="flex-1">
+      <label class="block text-xs font-black uppercase tracking-widest text-slate-400 mb-2 pl-1">Search Registry</label>
+      <div class="relative group">
+        <i data-lucide="search" class="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 group-focus-within:text-emerald-500 transition-colors"></i>
+        <input name="q" class="w-full pl-11 pr-4 py-2.5 border-2 border-slate-100 rounded-xl focus:border-emerald-500 focus:bg-white transition-all outline-none text-sm" placeholder="Search doctor, department, or username..." value="{{ query }}">
+      </div>
+    </div>
+    <button class="btn-modern btn-primary bg-slate-900 hover:bg-black py-3 px-10 text-sm shadow-xl shadow-slate-200">
+      Search Records
+    </button>
+  </form>
+</section>
+
+<section class="card-3d overflow-hidden animate-slide-up animate-delay-2">
+  <div class="overflow-x-auto">
+    <table class="modern-table mb-0">
+      <thead>
+        <tr>
+          <th class="pl-8">Service / Provider</th>
+          <th>Patient (User)</th>
+          <th>Schedule</th>
+          <th>Mode</th>
+          <th>Status</th>
+          <th class="pr-8 text-right">Operations</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for appt in appointments_page %}
+          <tr class="group border-b border-slate-50 last:border-none">
+            <td class="pl-8 py-5">
+              <div class="flex items-center gap-4">
+                <div class="h-10 w-10 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center shrink-0">
+                  <i data-lucide="stethoscope" class="w-5 h-5"></i>
+                </div>
+                <div class="min-w-0">
+                  <p class="font-black text-slate-900 truncate">{{ appt.doctor_name }}</p>
+                  <p class="text-[10px] text-slate-400 font-bold uppercase tracking-widest truncate">{{ appt.department }}</p>
+                </div>
+              </div>
+            </td>
+            <td>
+              <a href="{% url 'admin_user_detail' appt.user.id %}" class="flex items-center gap-3 group/user">
+                <div class="h-8 w-8 rounded-lg bg-slate-50 flex items-center justify-center text-xs font-black text-slate-400 group-hover/user:bg-emerald-600 group-hover/user:text-white transition-all">
+                  {{ appt.user.username|slice:":1"|upper }}
+                </div>
+                <span class="text-sm font-bold text-slate-600 group-hover/user:text-emerald-600 transition-colors">{{ appt.user.username }}</span>
+              </a>
+            </td>
+            <td>
+              <div class="flex items-center gap-2">
+                <i data-lucide="calendar" class="w-4 h-4 text-slate-300"></i>
+                <p class="text-sm font-bold text-slate-600">{{ appt.datetime|date:'M d, Y • H:i' }}</p>
+              </div>
+            </td>
+            <td>
+              <span class="badge bg-slate-50 text-slate-600 border border-slate-100">{{ appt.get_mode_display }}</span>
+            </td>
+            <td>
+              <span class="badge 
+                {% if appt.status == 'SCHEDULED' %}bg-emerald-100 text-emerald-700
+                {% elif appt.status == 'PENDING' %}bg-amber-100 text-amber-700
+                {% else %}bg-slate-100 text-slate-600{% endif %}">
+                {{ appt.get_status_display }}
+              </span>
+            </td>
+            <td class="pr-8 py-5 text-right">
+              <button class="p-2 rounded-lg text-slate-400 hover:bg-slate-100 transition-all opacity-0 group-hover:opacity-100">
+                <i data-lucide="more-horizontal" class="w-4 h-4"></i>
+              </button>
+            </td>
+          </tr>
+        {% empty %}
+          <tr>
+            <td colspan="6" class="py-20 text-center">
+              <div class="flex flex-col items-center gap-4">
+                <div class="h-20 w-20 rounded-[2.5rem] bg-slate-50 flex items-center justify-center text-slate-200">
+                  <i data-lucide="calendar-x" class="w-12 h-12"></i>
+                </div>
+                <h3 class="font-black text-xl text-slate-900">No appointments recorded</h3>
+              </div>
+            </td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  {% if appointments_page.paginator.num_pages > 1 %}
+    <div class="p-6 border-t border-slate-50 bg-slate-50/30 flex flex-wrap items-center justify-between gap-4">
+      <p class="text-xs font-black uppercase tracking-widest text-slate-400">
+        Displaying {{ appointments_page.start_index }}-{{ appointments_page.end_index }} of {{ appointments_page.paginator.count }}
+      </p>
+      <div class="flex gap-2">
+        {% if appointments_page.has_previous %}
+          <a href="?page={{ appointments_page.previous_page_number }}&q={{ query }}" class="btn-modern btn-outline bg-white py-2 px-4 text-xs border-slate-200">
+            <i data-lucide="chevron-left" class="w-4 h-4 mr-1"></i> Previous
+          </a>
+        {% endif %}
+        {% if appointments_page.has_next %}
+          <a href="?page={{ appointments_page.next_page_number }}&q={{ query }}" class="btn-modern btn-outline bg-white py-2 px-4 text-xs border-slate-200">
+            Next <i data-lucide="chevron-right" class="w-4 h-4 mr-1"></i>
+          </a>
+        {% endif %}
+      </div>
+    </div>
+  {% endif %}
+</section>
+{% endblock %}

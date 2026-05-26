@@ -1,0 +1,45 @@
+# Version control
+.git
+.gitignore
+
+# Python cache
+__pycache__
+*.pyc
+*.pyo
+*.pyd
+.Python
+
+# Virtual environments
+.venv
+venv
+env
+
+# Environment files
+.env
+.env.*
+!.env.example
+
+# Dev / test artefacts
+*.sqlite3
+db.sqlite3
+.coverage
+htmlcov
+.pytest_cache
+.mypy_cache
+.ruff_cache
+
+# Build output
+staticfiles
+media
+
+# Docs & scripts not needed in image
+*.md
+run-local.fish
+AUDIT_REPORT.md
+ROLE_SEPARATION.md
+DEPLOYMENT.md
+
+# IDE
+.idea
+.vscode
+*.swp

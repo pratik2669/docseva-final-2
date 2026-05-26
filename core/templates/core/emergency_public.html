@@ -1,0 +1,126 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Emergency Info | DocSeva</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
+    body { font-family: 'Plus Jakarta Sans', sans-serif; }
+    .emergency-card { background: #ffffff; border: 4px solid #ef4444; border-radius: 2.5rem; box-shadow: 0 25px 50px -12px rgba(239, 68, 68, 0.25); }
+  </style>
+</head>
+<body class="bg-red-50 text-slate-900 min-h-screen selection:bg-red-100 selection:text-red-700">
+  <main class="max-w-3xl mx-auto p-4 py-8 md:py-16">
+    <section class="emergency-card p-6 md:p-10 relative overflow-hidden animate-slide-up">
+      <!-- High visibility banner -->
+      <div class="absolute top-0 inset-x-0 h-4 bg-red-600"></div>
+      
+      <div class="flex flex-wrap items-center justify-between gap-6 mb-10 mt-4">
+        <div class="flex items-center gap-4">
+          <div class="h-16 w-16 rounded-2xl bg-red-600 flex items-center justify-center text-white shadow-lg shadow-red-200">
+            <i data-lucide="heart-pulse" class="w-10 h-10"></i>
+          </div>
+          <div>
+            <p class="text-xs font-black uppercase tracking-[0.3em] text-red-600 mb-1">Emergency Medical Profile</p>
+            <h1 class="text-4xl font-black text-slate-900 tracking-tight">{{ profile.display_name }}</h1>
+          </div>
+        </div>
+        <div class="px-4 py-2 bg-red-600 text-white rounded-xl font-black text-sm uppercase tracking-widest animate-pulse">
+          Critical Info
+        </div>
+      </div>
+
+      <div class="p-6 rounded-2xl bg-red-50/50 border-2 border-red-100 mb-10 text-red-900 leading-relaxed text-sm font-bold">
+        <i data-lucide="info" class="w-5 h-5 inline-block mr-2 mb-1"></i>
+        This profile was shared by the user through DocSeva for emergency response only. Please verify medical details with clinical records if possible.
+      </div>
+
+      {% if empty %}
+        <div class="py-20 text-center text-slate-400">
+          <i data-lucide="file-question" class="w-16 h-16 mx-auto mb-4 opacity-20"></i>
+          <p class="font-black text-xl">No details provided by user</p>
+          <p class="text-sm">This emergency profile has not been populated yet.</p>
+        </div>
+      {% else %}
+        <div class="grid md:grid-cols-2 gap-6">
+          <div class="p-6 rounded-3xl bg-red-50 border border-red-100 group">
+            <p class="text-[10px] font-black uppercase tracking-widest text-red-600 mb-3">Blood Group</p>
+            <div class="flex items-center gap-3">
+              <i data-lucide="droplet" class="w-5 h-5 text-red-500"></i>
+              <p class="text-2xl font-black text-red-900">{{ profile.blood_group|default:'Unknown' }}</p>
+            </div>
+          </div>
+          
+          <div class="p-6 rounded-3xl bg-red-50 border border-red-100 group">
+            <p class="text-[10px] font-black uppercase tracking-widest text-red-600 mb-3">Emergency Contact</p>
+            <div class="flex items-center gap-3">
+              <i data-lucide="phone-forwarded" class="w-5 h-5 text-red-500"></i>
+              <p class="text-xl font-black text-red-900">{{ profile.emergency_contact|default:'Not Provided' }}</p>
+            </div>
+          </div>
+
+          <div class="md:col-span-2 p-6 rounded-3xl bg-slate-50 border border-slate-100">
+            <p class="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-3 flex items-center gap-2">
+              <i data-lucide="alert-circle" class="w-3 h-3 text-red-500"></i> Allergies
+            </p>
+            <p class="font-bold text-slate-800 leading-relaxed">
+              {{ profile.allergies|linebreaksbr|default:'No known allergies' }}
+            </p>
+          </div>
+
+          <div class="md:col-span-2 p-6 rounded-3xl bg-slate-50 border border-slate-100">
+            <p class="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-3 flex items-center gap-2">
+              <i data-lucide="activity" class="w-3 h-3 text-red-500"></i> Chronic Conditions
+            </p>
+            <p class="font-bold text-slate-800 leading-relaxed">
+              {{ profile.chronic_conditions|linebreaksbr|default:'None reported' }}
+            </p>
+          </div>
+
+          <div class="md:col-span-2 p-6 rounded-3xl bg-slate-50 border border-slate-100">
+            <p class="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-3 flex items-center gap-2">
+              <i data-lucide="pill" class="w-3 h-3 text-blue-500"></i> Current Medications
+            </p>
+            <p class="font-bold text-slate-800 leading-relaxed">
+              {{ profile.current_medications|linebreaksbr|default:'None reported' }}
+            </p>
+          </div>
+
+          <div class="md:col-span-2 p-6 rounded-3xl bg-slate-50 border border-slate-100">
+            <p class="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-3 flex items-center gap-2">
+              <i data-lucide="hospital" class="w-3 h-3 text-slate-400"></i> Primary Doctor / Facility
+            </p>
+            <p class="font-bold text-slate-800">
+              {{ profile.primary_doctor|default:'Not Provided' }}
+            </p>
+          </div>
+
+          <div class="md:col-span-2 p-6 rounded-3xl bg-slate-900 text-white">
+            <p class="text-[10px] font-black uppercase tracking-widest text-red-500 mb-3 flex items-center gap-2">
+              <i data-lucide="sticky-note" class="w-3 h-3"></i> Emergency Notes
+            </p>
+            <p class="text-sm font-bold leading-relaxed opacity-90">
+              {{ profile.emergency_notes|linebreaksbr|default:'No additional notes' }}
+            </p>
+          </div>
+        </div>
+      {% endif %}
+
+      <div class="mt-12 pt-8 border-t border-slate-100 flex flex-wrap justify-between items-center gap-4">
+        <div class="flex items-center gap-2">
+          <div class="h-8 w-8 rounded-lg bg-blue-600 flex items-center justify-center text-white">
+            <i data-lucide="shield-check" class="w-5 h-5"></i>
+          </div>
+          <span class="font-black text-slate-900">DocSeva</span>
+        </div>
+        <p class="text-[10px] font-black uppercase tracking-widest text-slate-400">Secure Emergency Access Protocol</p>
+      </div>
+    </section>
+  </main>
+  
+  <script>lucide.createIcons();</script>
+</body>
+</html>

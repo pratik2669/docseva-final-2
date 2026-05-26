@@ -1,0 +1,136 @@
+{% extends 'core/admin/base_admin.html' %}
+{% block title %}Support Tickets | DocSeva Admin{% endblock %}
+{% block content %}
+<div class="mb-10 animate-slide-up">
+  <div class="flex items-center gap-2 text-amber-600 font-black text-xs uppercase tracking-[0.2em] mb-2">
+    <i data-lucide="message-square" class="w-4 h-4"></i> Citizen Assistance
+  </div>
+  <h1 class="text-4xl font-black text-slate-900 tracking-tight">Active Support Queue</h1>
+  <p class="text-slate-500 mt-1">Review, respond, and resolve user technical and operational requests.</p>
+</div>
+
+<section class="glass-3d p-6 mb-8 animate-slide-up animate-delay-1">
+  <form method="get" class="flex flex-wrap gap-4 items-end">
+    <div class="flex-1 min-w-[300px]">
+      <label class="block text-xs font-black uppercase tracking-widest text-slate-400 mb-2 pl-1">Search Tickets</label>
+      <div class="relative group">
+        <i data-lucide="search" class="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 group-focus-within:text-amber-500 transition-colors"></i>
+        <input name="q" class="w-full pl-11 pr-4 py-2.5 border-2 border-slate-100 rounded-xl focus:border-amber-500 focus:bg-white transition-all outline-none text-sm" placeholder="Subject, message, or username..." value="{{ query }}">
+      </div>
+    </div>
+    
+    <div class="w-full md:w-64">
+      <label class="block text-xs font-black uppercase tracking-widest text-slate-400 mb-2 pl-1">Filter by Status</label>
+      <div class="relative">
+        <select name="status" class="w-full pl-4 pr-10 py-2.5 border-2 border-slate-100 rounded-xl focus:border-amber-500 outline-none text-sm cursor-pointer appearance-none bg-white">
+          <option value="">All Statuses</option>
+          {% for value,label in statuses %}
+            <option value="{{ value }}" {% if status_filter == value %}selected{% endif %}>{{ label }}</option>
+          {% endfor %}
+        </select>
+        <i data-lucide="chevron-down" class="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none"></i>
+      </div>
+    </div>
+
+    <div class="flex gap-2">
+      <button class="btn-modern btn-primary bg-slate-900 hover:bg-black py-3 px-8 text-sm">Update View</button>
+      <a href="{% url 'admin_tickets' %}" class="btn-modern btn-outline py-3 px-6 text-sm border-slate-200">Clear</a>
+    </div>
+  </form>
+</section>
+
+<section class="card-3d overflow-hidden animate-slide-up animate-delay-2">
+  <div class="overflow-x-auto">
+    <table class="modern-table mb-0">
+      <thead>
+        <tr>
+          <th class="pl-8">Ticket Information</th>
+          <th>Citizen</th>
+          <th>Status</th>
+          <th>Last Activity</th>
+          <th class="pr-8 text-right">Action</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for ticket in tickets_page %}
+          <tr class="group border-b border-slate-50 last:border-none">
+            <td class="pl-8 py-5">
+              <div class="flex items-start gap-4">
+                <div class="h-10 w-10 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center shrink-0 mt-1">
+                  <i data-lucide="ticket" class="w-5 h-5"></i>
+                </div>
+                <div class="min-w-0">
+                  <div class="flex items-center gap-2 mb-1">
+                    <span class="text-[10px] font-black uppercase tracking-widest text-slate-400">#{{ ticket.id }}</span>
+                    <p class="font-black text-slate-900 truncate max-w-[300px]">{{ ticket.subject }}</p>
+                  </div>
+                  <p class="text-xs text-slate-500 line-clamp-1 italic">"{{ ticket.message }}"</p>
+                </div>
+              </div>
+            </td>
+            <td>
+              <a href="{% url 'admin_user_detail' ticket.user.id %}" class="flex items-center gap-3 group/user">
+                <div class="h-8 w-8 rounded-lg bg-slate-50 flex items-center justify-center text-xs font-black text-slate-400 group-hover/user:bg-amber-600 group-hover/user:text-white transition-all">
+                  {{ ticket.user.username|slice:":1"|upper }}
+                </div>
+                <span class="text-sm font-bold text-slate-600 group-hover/user:text-amber-600 transition-colors">{{ ticket.user.username }}</span>
+              </a>
+            </td>
+            <td>
+              <span class="badge 
+                {% if ticket.status == 'OPEN' %}bg-amber-100 text-amber-700 border border-amber-200
+                {% elif ticket.status == 'RESOLVED' %}bg-emerald-100 text-emerald-700 border border-emerald-200
+                {% else %}bg-slate-50 text-slate-600 border border-slate-100{% endif %}">
+                {{ ticket.get_status_display }}
+              </span>
+            </td>
+            <td>
+              <p class="text-xs font-bold text-slate-500">{{ ticket.updated_at|date:'M d, Y' }}</p>
+              <p class="text-[10px] text-slate-300 font-black uppercase tracking-widest">{{ ticket.updated_at|date:'H:i' }}</p>
+            </td>
+            <td class="pr-8 py-5 text-right">
+              <a href="{% url 'admin_ticket_detail' ticket.id %}" class="btn-modern btn-primary bg-amber-600 hover:bg-amber-700 py-2 px-6 text-xs shadow-lg shadow-amber-100">
+                Open Ticket
+              </a>
+            </td>
+          </tr>
+        {% empty %}
+          <tr>
+            <td colspan="5" class="py-20 text-center">
+              <div class="flex flex-col items-center gap-4">
+                <div class="h-20 w-20 rounded-[2rem] bg-slate-50 flex items-center justify-center text-slate-200">
+                  <i data-lucide="inbox" class="w-12 h-12"></i>
+                </div>
+                <div>
+                  <h3 class="font-black text-xl text-slate-900">Queue is empty</h3>
+                  <p class="text-slate-500 text-sm">No support tickets match your current selection.</p>
+                </div>
+              </div>
+            </td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  {% if tickets_page.paginator.num_pages > 1 %}
+    <div class="p-6 border-t border-slate-50 bg-slate-50/30 flex flex-wrap items-center justify-between gap-4">
+      <p class="text-xs font-black uppercase tracking-widest text-slate-400">
+        Queue Index: {{ tickets_page.start_index }} - {{ tickets_page.end_index }} of {{ tickets_page.paginator.count }} tickets
+      </p>
+      <div class="flex gap-2">
+        {% if tickets_page.has_previous %}
+          <a href="?page={{ tickets_page.previous_page_number }}&q={{ query }}&status={{ status_filter }}" class="btn-modern btn-outline bg-white py-2 px-4 text-xs border-slate-200">
+            <i data-lucide="chevron-left" class="w-4 h-4 mr-1"></i> Previous
+          </a>
+        {% endif %}
+        {% if tickets_page.has_next %}
+          <a href="?page={{ tickets_page.next_page_number }}&q={{ query }}&status={{ status_filter }}" class="btn-modern btn-outline bg-white py-2 px-4 text-xs border-slate-200">
+            Next <i data-lucide="chevron-right" class="w-4 h-4 ml-1"></i>
+          </a>
+        {% endif %}
+      </div>
+    </div>
+  {% endif %}
+</section>
+{% endblock %}

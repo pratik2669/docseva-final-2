@@ -1,0 +1,22 @@
+{% extends 'core/base.html' %}
+{% block title %}FAQ | DocSeva{% endblock %}
+{% block structured_data %}
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{% for q,a in faqs %}{"@type":"Question","name":"{{ q|escapejs }}","acceptedAnswer":{"@type":"Answer","text":"{{ a|escapejs }}"}}{% if not forloop.last %},{% endif %}{% endfor %}]}
+</script>
+{% endblock %}
+{% block content %}
+<section class="py-16 lg:py-24 animate-slide-up">
+  <span class="badge bg-blue-50 text-blue-700 mb-6">FAQ</span>
+  <h1 class="text-5xl md:text-6xl font-black tracking-tight leading-tight mb-6">Common deployment and product questions.</h1>
+  <p class="text-xl text-slate-500 max-w-3xl leading-relaxed">These answers match the included project configuration and production checklist.</p>
+</section>
+<section class="space-y-4 mb-16">
+  {% for q,a in faqs %}
+    <details class="card-3d p-6 group">
+      <summary class="cursor-pointer list-none flex items-center justify-between gap-4 font-black text-lg">{{ q }}<i data-lucide="chevron-down" class="w-5 h-5 group-open:rotate-180 transition-transform"></i></summary>
+      <p class="text-slate-500 mt-4 leading-relaxed">{{ a }}</p>
+    </details>
+  {% endfor %}
+</section>
+{% endblock %}

@@ -1,0 +1,17 @@
+[Unit]
+Description=DocSeva Celery Worker
+After=network.target redis.service postgresql.service
+
+[Service]
+User=docseva
+Group=www-data
+WorkingDirectory=/srv/docseva/current
+EnvironmentFile=/srv/docseva/.env
+ExecStart=/srv/docseva/venv/bin/celery -A docseva worker --loglevel=INFO
+Restart=always
+RestartSec=5
+PrivateTmp=true
+NoNewPrivileges=true
+
+[Install]
+WantedBy=multi-user.target

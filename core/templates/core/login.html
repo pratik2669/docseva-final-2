@@ -1,0 +1,50 @@
+{% extends 'core/base.html' %}
+{% block title %}Login | DocSeva{% endblock %}
+{% block content %}
+<div class="max-w-md mx-auto py-12 animate-slide-up">
+  <div class="card-3d p-8 md:p-10">
+    <div class="text-center mb-10">
+      <div class="h-16 w-16 rounded-2xl bg-blue-600 flex items-center justify-center text-white mx-auto mb-6 shadow-xl shadow-blue-200">
+        <i data-lucide="lock" class="w-8 h-8"></i>
+      </div>
+      <h1 class="text-3xl font-black text-slate-900 tracking-tight">Welcome Back</h1>
+      <p class="text-slate-500 mt-2">Access your secure document vault</p>
+    </div>
+
+    <form method="post" class="space-y-6">
+      {% csrf_token %}
+      <div>
+        <label class="block text-sm font-bold text-slate-700 mb-2">Username or Email</label>
+        <div class="relative group">
+          <i data-lucide="user" class="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400 group-focus-within:text-blue-500 transition-colors"></i>
+          <input name="username" class="w-full pl-12 pr-4 py-3 border-2 border-slate-100 rounded-xl focus:border-blue-500 focus:bg-white transition-all outline-none" required autocomplete="username" placeholder="Enter your credentials">
+        </div>
+      </div>
+      <div>
+        <div class="flex items-center justify-between mb-2">
+          <label class="text-sm font-bold text-slate-700">Password</label>
+          <a href="{% url 'password_reset' %}" class="text-xs font-bold text-blue-600 hover:underline">Forgot?</a>
+        </div>
+        <div class="relative group">
+          <i data-lucide="key-round" class="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400 group-focus-within:text-blue-500 transition-colors"></i>
+          <input name="password" type="password" class="w-full pl-12 pr-4 py-3 border-2 border-slate-100 rounded-xl focus:border-blue-500 focus:bg-white transition-all outline-none" required autocomplete="current-password" placeholder="••••••••">
+        </div>
+      </div>
+      
+      <button class="btn-modern btn-primary w-full py-4 text-lg shadow-xl shadow-blue-100">
+        Sign In to Vault <i data-lucide="log-in" class="w-5 h-5"></i>
+      </button>
+    </form>
+
+    <div class="mt-8 pt-8 border-t border-slate-50 text-center">
+      <p class="text-slate-500">No account yet? <a href="{% url 'registration' %}" class="text-blue-600 font-bold hover:underline">Create free account</a></p>
+    </div>
+  </div>
+  
+  <div class="mt-8 text-center flex items-center justify-center gap-6 opacity-40">
+    <div class="flex items-center gap-1 text-xs font-bold uppercase tracking-widest"><i data-lucide="shield-check" class="w-4 h-4"></i> Secure</div>
+    <div class="flex items-center gap-1 text-xs font-bold uppercase tracking-widest"><i data-lucide="lock" class="w-4 h-4"></i> Private</div>
+    <div class="flex items-center gap-1 text-xs font-bold uppercase tracking-widest"><i data-lucide="check-circle" class="w-4 h-4"></i> Verified</div>
+  </div>
+</div>
+{% endblock %}
